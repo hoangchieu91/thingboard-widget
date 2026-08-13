@@ -1444,7 +1444,7 @@ def generate_electric_3phase_widget(theme_mode="dual"):
             var vb = getVal(['voltageB', 'voltage_b', 'vb', 'v_b', 'ubn', 'u_bn', 'l2_voltage', 'voltage_l2', 'voltagel2', 'v2', 'phase_b_voltage', 'ub'], 220.5);
             var vc = getVal(['voltageC', 'voltage_c', 'vc', 'v_c', 'ucn', 'u_cn', 'l3_voltage', 'voltage_l3', 'voltagel3', 'v3', 'phase_c_voltage', 'uc'], 220.8);
 
-            var powerTotal = getVal(['powerTotal', 'power_total', 'activePower', 'active_power', 'ptotal', 'p_total', 'kw', 'power', 'p', 'w', 'total_power', 'totalpower', 'activepower', 'total_active_power'], null);
+            var powerTotal = getVal(['powerTotal', 'power_total', 'activePower', 'active_power', 'Power_Active_Total', 'power_active_total', 'poweractivetotal', 'active_power_total', 'activepowertotal', 'ptotal', 'p_total', 'kw', 'power', 'p', 'w', 'total_power', 'totalpower', 'activepower', 'total_active_power'], null);
             
             // Auto-calculate 3-Phase active power (kW) if not explicitly provided by device telemetry
             if (powerTotal === null && va !== null && vb !== null && vc !== null && ia !== null && ib !== null && ic !== null) {{
