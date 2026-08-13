@@ -1761,7 +1761,7 @@ self.typeParameters = function() {{
             "templateHtml": card_html,
             "templateCss": card_css,
             "controllerScript": controller_js,
-            "settingsDirective": "tb-html-card-widget-settings",
+            "settingsDirective": "",
             "settingsForm": [
                 {
                     "id": "maxCurrent",
