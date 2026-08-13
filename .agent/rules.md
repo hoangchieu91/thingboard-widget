@@ -13,3 +13,4 @@
 - Không nổ lỗi scope `self` (tất cả helper function nằm trong closure `self.onInit`).
 - Cấu hình `defaultConfig` đầy đủ `function` datasources để ô Preview trong Widget Editor luôn có Live Demo.
 - Scope jQuery selector `$('#id', self.ctx.$container)`.
+- Đặt `"settingsDirective": ""` khi khai báo `settingsForm` để ThingsBoard 4.x hiển thị tab Cài đặt tùy chỉnh trên UI.

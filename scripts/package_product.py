@@ -52,6 +52,12 @@ def validate_tb_rules(data):
     if unscoped_matches:
         issues.append(f"Potential Unscoped jQuery Selector found: {unscoped_matches[:3]}. Always pass $container context: $('#id', $container)")
 
+    # Rule Check: Dynamic Settings Form (settingsForm vs settingsDirective)
+    settings_form = desc.get("settingsForm", [])
+    settings_directive = desc.get("settingsDirective", "")
+    if settings_form and len(settings_form) > 0 and settings_directive == "tb-html-card-widget-settings":
+        errors.append("Anti-Pattern Detected: 'settingsForm' is defined, but 'settingsDirective' is set to 'tb-html-card-widget-settings'! In ThingsBoard 4.x, this suppresses custom settings. Set 'settingsDirective': '' (empty string).")
+
     return issues, errors
 
 def main():

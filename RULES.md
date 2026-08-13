@@ -96,3 +96,21 @@ var entityId = {
 };
 self.ctx.actionsApi.handleWidgetAction(event, descriptor, entityId, entityName, {}, entityLabel);
 ```
+
+### 4. Cấu hình Settings Form động (`settingsForm` & `settingsDirective: ""`)
+Để ThingsBoard 4.x tự động render giao diện Form cài đặt tùy chỉnh cho người dùng (ví dụ: nhập Dòng điện tối đa `maxCurrent`, tên tùy chỉnh `widgetTitle`), **BẮT BUỘC**:
+1. Đặt `"settingsDirective": ""` (chuỗi rỗng) trong `descriptor` (KHÔNG dùng `"tb-html-card-widget-settings"` vì nó sẽ chặn hiển thị `settingsForm`).
+2. Khai báo mảng `settingsForm` chuẩn Schema:
+```json
+"settingsDirective": "",
+"settingsForm": [
+    {
+        "id": "maxCurrent",
+        "name": "Dòng điện tối đa (Max Current - A)",
+        "type": "number",
+        "default": 75,
+        "required": false,
+        "fieldClass": "flex"
+    }
+]
+```

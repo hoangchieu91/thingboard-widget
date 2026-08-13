@@ -1517,20 +1517,30 @@ def generate_electric_3phase_widget(theme_mode="dual"):
             $('#bar-energy-week', $container).css('width', (pctWeek !== '0.0' ? Math.min(parseFloat(pctWeek), 100) : 0) + '%');
             $('#pct-energy-week', $container).text(energyWeek !== null && energyLastWeek !== null ? pctWeek + '%' : 'N/A');
 
-            // Alarm checking: Unbalance > 12% or Voltage out of 200V-240V
+            // Smart Alarm checking: Current Unbalance > 15% OR Voltage out of range (Smart detection for 220V phase vs 380V line voltage system)
             var validI = [ia, ib, ic].filter(function(v) {{ return v !== null; }});
             var validV = [va, vb, vc].filter(function(v) {{ return v !== null; }});
             var isAlarm = false;
             if (validI.length === 3) {{
                 var maxIVal = Math.max(ia, ib, ic);
                 var minIVal = Math.min(ia, ib, ic);
-                if (maxIVal > 0 && ((maxIVal - minIVal) / maxIVal) > 0.12) isAlarm = true;
+                if (maxIVal > 0 && ((maxIVal - minIVal) / maxIVal) > 0.15) isAlarm = true;
             }}
             if (validV.length > 0) {{
                 for (var k = 0; k < validV.length; k++) {{
-                    if (validV[k] < 200 || validV[k] > 240) {{
-                        isAlarm = true;
-                        break;
+                    var vVal = validV[k];
+                    if (vVal > 300) {{
+                        // Line-to-Line Voltage System (380V / 400V Nominal) -> Safe Range 340V - 430V
+                        if (vVal < 340 || vVal > 430) {{
+                            isAlarm = true;
+                            break;
+                        }}
+                    }} else {{
+                        // Line-to-Neutral Voltage System (220V Nominal) -> Safe Range 190V - 245V
+                        if (vVal < 190 || vVal > 245) {{
+                            isAlarm = true;
+                            break;
+                        }}
                     }}
                 }}
             }}

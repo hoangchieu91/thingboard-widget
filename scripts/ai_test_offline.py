@@ -56,6 +56,12 @@ def main():
         print("❌ TEST FAILED AT STEP 2: ANTI-PATTERN DETECTED! Calling '.then()' directly on 'http.get()' instead of '.subscribe()' for ThingsBoard 4.x RxJS Observable!")
         sys.exit(1)
 
+    settings_form = desc.get("settingsForm", [])
+    settings_directive = desc.get("settingsDirective", "")
+    if settings_form and len(settings_form) > 0 and settings_directive == "tb-html-card-widget-settings":
+        print("❌ TEST FAILED AT STEP 2: ANTI-PATTERN DETECTED! 'settingsForm' is defined, but 'settingsDirective' is set to 'tb-html-card-widget-settings'! In ThingsBoard 4.x, this suppresses custom settings. Set 'settingsDirective': '' (empty string).")
+        sys.exit(1)
+
     default_cfg_raw = desc.get("defaultConfig", "{}")
     try:
         def_cfg = json.loads(default_cfg_raw)
