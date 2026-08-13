@@ -1539,8 +1539,7 @@ def generate_electric_3phase_widget(theme_mode="dual"):
                 if (http && !self.ctx._fetchedLatestApi) {{
                     self.ctx._fetchedLatestApi = true;
                     var apiUrl = '/api/plugins/telemetry/' + ds0.entityType + '/' + ds0.entityId + '/values/timeseries/latest';
-                    http.get(apiUrl).then(function(res) {{
-                        var latestObj = (res && res.data) ? res.data : res;
+                    function handleLatestData(latestObj) {{
                         if (latestObj) {{
                             for (var key in latestObj) {{
                                 if (latestObj.hasOwnProperty(key)) {{
@@ -1553,7 +1552,18 @@ def generate_electric_3phase_widget(theme_mode="dual"):
                             }}
                             renderTelemetryMap();
                         }}
-                    }}).catch(function(e) {{}});
+                    }}
+
+                    var req = http.get(apiUrl);
+                    if (req && typeof req.subscribe === 'function') {{
+                        req.subscribe(function(res) {{
+                            handleLatestData(res && res.data ? res.data : res);
+                        }}, function(e) {{}});
+                    }} else if (req && typeof req.then === 'function') {{
+                        req.then(function(res) {{
+                            handleLatestData(res && res.data ? res.data : res);
+                        }}).catch(function(e) {{}});
+                    }}
                 }}
             }}
         }}
