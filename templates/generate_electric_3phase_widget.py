@@ -1408,116 +1408,153 @@ def generate_electric_3phase_widget(theme_mode="dual"):
             }}
         }}
 
-        function getVal(aliasList, defaultPreviewVal) {{
-            for (var i = 0; i < aliasList.length; i++) {{
-                var norm = normalizeKey(aliasList[i]);
-                if (dataMap.hasOwnProperty(norm) && dataMap[norm] !== undefined && dataMap[norm] !== null && dataMap[norm] !== '') {{
-                    var num = parseFloat(dataMap[norm]);
-                    return isNaN(num) ? dataMap[norm] : num;
+        function renderTelemetryMap() {{
+            function getVal(aliasList, defaultPreviewVal) {{
+                for (var i = 0; i < aliasList.length; i++) {{
+                    var norm = normalizeKey(aliasList[i]);
+                    if (dataMap.hasOwnProperty(norm) && dataMap[norm] !== undefined && dataMap[norm] !== null && dataMap[norm] !== '') {{
+                        var num = parseFloat(dataMap[norm]);
+                        return isNaN(num) ? dataMap[norm] : num;
+                    }}
+                }}
+                if (!isFunctionPreview) {{
+                    return null;
+                }}
+                return defaultPreviewVal;
+            }}
+
+            // Dynamic Max Current resolution: Telemetry -> Attribute -> Widget Settings -> Auto Scale -> Default (75.0A)
+            var maxCurrentConfig = (self.ctx.settings && self.ctx.settings.maxCurrent) ? parseFloat(self.ctx.settings.maxCurrent) : 75.0;
+            var maxCurrentVal = getVal(['maxCurrent', 'ratedCurrent', 'max_current', 'rated_current', 'imax', 'i_max'], maxCurrentConfig);
+            var maxCurrent = (maxCurrentVal !== null && maxCurrentVal > 0) ? maxCurrentVal : maxCurrentConfig;
+
+            var ia = getVal(['currentA', 'current_a', 'ia', 'i_a', 'i_phase_a', 'l1_current', 'current_l1', 'currentl1', 'i1', 'phase_a_current', 'a_current'], 45.2);
+            var ib = getVal(['currentB', 'current_b', 'ib', 'i_b', 'i_phase_b', 'l2_current', 'current_l2', 'currentl2', 'i2', 'phase_b_current', 'b_current'], 44.8);
+            var ic = getVal(['currentC', 'current_c', 'ic', 'i_c', 'i_phase_c', 'l3_current', 'current_l3', 'currentl3', 'i3', 'phase_c_current', 'c_current'], 46.1);
+
+            // Auto-scale maxCurrent if measured current exceeds configured max
+            var maxI = Math.max(ia || 0, ib || 0, ic || 0);
+            if (maxI > maxCurrent) {{
+                maxCurrent = Math.ceil(maxI * 1.2);
+            }}
+
+            $('.lbl-max-current', $container).text('Tải (Max ' + formatNumber(maxCurrent, 0) + 'A)');
+
+            var va = getVal(['voltageA', 'voltage_a', 'va', 'v_a', 'uan', 'u_an', 'l1_voltage', 'voltage_l1', 'voltagel1', 'v1', 'phase_a_voltage', 'ua'], 220.1);
+            var vb = getVal(['voltageB', 'voltage_b', 'vb', 'v_b', 'ubn', 'u_bn', 'l2_voltage', 'voltage_l2', 'voltagel2', 'v2', 'phase_b_voltage', 'ub'], 220.5);
+            var vc = getVal(['voltageC', 'voltage_c', 'vc', 'v_c', 'ucn', 'u_cn', 'l3_voltage', 'voltage_l3', 'voltagel3', 'v3', 'phase_c_voltage', 'uc'], 220.8);
+
+            var powerTotal = getVal(['powerTotal', 'power_total', 'activePower', 'active_power', 'ptotal', 'p_total', 'kw', 'power', 'p', 'w'], 29.5);
+            var energyTotal = getVal(['energyTotal', 'energy_total', 'totalEnergy', 'total_energy', 'total_kwh', 'totalkwh', 'kwh', 'energy', 'active_energy', 'etotal', 'e_total'], 124582.6);
+
+            var energyToday = getVal(['energyToday', 'energy_today', 'todayEnergy', 'today_energy', 'dailyEnergy', 'daily_energy', 'today_kwh', 'todaykwh'], 342.5);
+            var energyYesterday = getVal(['energyYesterday', 'energy_yesterday', 'yesterdayEnergy', 'yesterday_energy', 'yesterday_kwh', 'yesterdaykwh'], 391.2);
+            var energyWeek = getVal(['energyWeek', 'energy_week', 'weekEnergy', 'week_energy', 'weekly_energy', 'weeklyenergy', 'week_kwh'], 2350.0);
+            var energyLastWeek = getVal(['energyLastWeek', 'energy_lastweek', 'lastweekEnergy', 'lastweek_energy', 'last_week_energy', 'lastweek_kwh'], 3150.0);
+
+            // Render Values
+            $('#val-total-energy', $container).text(energyTotal !== null ? formatNumber(energyTotal, 1) + ' kWh' : 'N/A');
+
+            updatePhaseCard('ia', ia, maxCurrent, 'var(--phase-a)');
+            updatePhaseCard('ib', ib, maxCurrent, 'var(--phase-b)');
+            updatePhaseCard('ic', ic, maxCurrent, 'var(--phase-c)');
+
+            $('#val-va', $container).text(va !== null ? formatNumber(va, 1) + ' V' : 'N/A');
+            $('#val-vb', $container).text(vb !== null ? formatNumber(vb, 1) + ' V' : 'N/A');
+            $('#val-vc', $container).text(vc !== null ? formatNumber(vc, 1) + ' V' : 'N/A');
+
+            $('#val-power', $container).text(powerTotal !== null ? formatNumber(powerTotal, 1) + ' kW' : 'N/A');
+
+            // Energy Today
+            $('#val-energy-today', $container).text(energyToday !== null ? formatNumber(energyToday, 1) + ' kWh' : 'N/A');
+            $('#val-energy-yesterday', $container).text(energyYesterday !== null ? formatNumber(energyYesterday, 1) + ' kWh' : 'N/A');
+            var pctToday = (energyToday !== null && energyYesterday !== null && energyYesterday > 0) ? ((energyToday / energyYesterday) * 100).toFixed(1) : '0.0';
+            $('#bar-energy-today', $container).css('width', (pctToday !== '0.0' ? Math.min(parseFloat(pctToday), 100) : 0) + '%');
+            $('#pct-energy-today', $container).text(energyToday !== null && energyYesterday !== null ? pctToday + '%' : 'N/A');
+
+            // Energy Week
+            $('#val-energy-week', $container).text(energyWeek !== null ? formatNumber(energyWeek, 1) + ' kWh' : 'N/A');
+            $('#val-energy-lastweek', $container).text(energyLastWeek !== null ? formatNumber(energyLastWeek, 1) + ' kWh' : 'N/A');
+            var pctWeek = (energyWeek !== null && energyLastWeek !== null && energyLastWeek > 0) ? ((energyWeek / energyLastWeek) * 100).toFixed(1) : '0.0';
+            $('#bar-energy-week', $container).css('width', (pctWeek !== '0.0' ? Math.min(parseFloat(pctWeek), 100) : 0) + '%');
+            $('#pct-energy-week', $container).text(energyWeek !== null && energyLastWeek !== null ? pctWeek + '%' : 'N/A');
+
+            // Alarm checking: Unbalance > 12% or Voltage out of 200V-240V
+            var validI = [ia, ib, ic].filter(function(v) {{ return v !== null; }});
+            var validV = [va, vb, vc].filter(function(v) {{ return v !== null; }});
+            var isAlarm = false;
+            if (validI.length === 3) {{
+                var maxIVal = Math.max(ia, ib, ic);
+                var minIVal = Math.min(ia, ib, ic);
+                if (maxIVal > 0 && ((maxIVal - minIVal) / maxIVal) > 0.12) isAlarm = true;
+            }}
+            if (validV.length > 0) {{
+                for (var k = 0; k < validV.length; k++) {{
+                    if (validV[k] < 200 || validV[k] > 240) {{
+                        isAlarm = true;
+                        break;
+                    }}
                 }}
             }}
-            if (!isFunctionPreview) {{
-                return null;
+
+            if (isAlarm) {{
+                $('#alarm-box', $container).css('display', 'flex');
+            }} else {{
+                $('#alarm-box', $container).css('display', 'none');
             }}
-            return defaultPreviewVal;
-        }}
 
-        // Dynamic Max Current resolution: Telemetry -> Attribute -> Widget Settings -> Default (75.0A)
-        var maxCurrentConfig = (self.ctx.settings && self.ctx.settings.maxCurrent) ? parseFloat(self.ctx.settings.maxCurrent) : 75.0;
-        var maxCurrentVal = getVal(['maxCurrent', 'ratedCurrent', 'max_current', 'rated_current', 'imax', 'i_max'], maxCurrentConfig);
-        var maxCurrent = (maxCurrentVal !== null && maxCurrentVal > 0) ? maxCurrentVal : maxCurrentConfig;
+            // Add to Chart Data buffer
+            if (ia !== null || ib !== null || ic !== null) {{
+                var timeLabel = new Date().toLocaleTimeString([], {{ hour: '2-digit', minute: '2-digit', second: '2-digit' }});
+                chartHistoryData.labels.push(timeLabel);
+                chartHistoryData.ia.push(ia !== null ? ia : 0);
+                chartHistoryData.ib.push(ib !== null ? ib : 0);
+                chartHistoryData.ic.push(ic !== null ? ic : 0);
 
-        $('.lbl-max-current', $container).text('Tải (Max ' + formatNumber(maxCurrent, 0) + 'A)');
+                if (chartHistoryData.labels.length > 15) {{
+                    chartHistoryData.labels.shift();
+                    chartHistoryData.ia.shift();
+                    chartHistoryData.ib.shift();
+                    chartHistoryData.ic.shift();
+                }}
 
-        var ia = getVal(['currentA', 'current_a', 'ia', 'i_a', 'i_phase_a', 'l1_current', 'current_l1', 'currentl1', 'i1', 'phase_a_current'], 45.2);
-        var ib = getVal(['currentB', 'current_b', 'ib', 'i_b', 'i_phase_b', 'l2_current', 'current_l2', 'currentl2', 'i2', 'phase_b_current'], 44.8);
-        var ic = getVal(['currentC', 'current_c', 'ic', 'i_c', 'i_phase_c', 'l3_current', 'current_l3', 'currentl3', 'i3', 'phase_c_current'], 46.1);
-
-        var va = getVal(['voltageA', 'voltage_a', 'va', 'v_a', 'uan', 'u_an', 'l1_voltage', 'voltage_l1', 'voltagel1', 'v1', 'phase_a_voltage'], 220.1);
-        var vb = getVal(['voltageB', 'voltage_b', 'vb', 'v_b', 'ubn', 'u_bn', 'l2_voltage', 'voltage_l2', 'voltagel2', 'v2', 'phase_b_voltage'], 220.5);
-        var vc = getVal(['voltageC', 'voltage_c', 'vc', 'v_c', 'ucn', 'u_cn', 'l3_voltage', 'voltage_l3', 'voltagel3', 'v3', 'phase_c_voltage'], 220.8);
-
-        var powerTotal = getVal(['powerTotal', 'power_total', 'activePower', 'active_power', 'ptotal', 'p_total', 'kw', 'power', 'p'], 29.5);
-        var energyTotal = getVal(['energyTotal', 'energy_total', 'totalEnergy', 'total_energy', 'total_kwh', 'totalkwh', 'kwh', 'energy', 'active_energy', 'etotal', 'e_total'], 124582.6);
-
-        var energyToday = getVal(['energyToday', 'energy_today', 'todayEnergy', 'today_energy', 'dailyEnergy', 'daily_energy', 'today_kwh', 'todaykwh'], 342.5);
-        var energyYesterday = getVal(['energyYesterday', 'energy_yesterday', 'yesterdayEnergy', 'yesterday_energy', 'yesterday_kwh', 'yesterdaykwh'], 391.2);
-        var energyWeek = getVal(['energyWeek', 'energy_week', 'weekEnergy', 'week_energy', 'weekly_energy', 'weeklyenergy', 'week_kwh'], 2350.0);
-        var energyLastWeek = getVal(['energyLastWeek', 'energy_lastweek', 'lastweekEnergy', 'lastweek_energy', 'last_week_energy', 'lastweek_kwh'], 3150.0);
-
-        // Render Values
-        $('#val-total-energy', $container).text(energyTotal !== null ? formatNumber(energyTotal, 1) + ' kWh' : 'N/A');
-
-        updatePhaseCard('ia', ia, maxCurrent, 'var(--phase-a)');
-        updatePhaseCard('ib', ib, maxCurrent, 'var(--phase-b)');
-        updatePhaseCard('ic', ic, maxCurrent, 'var(--phase-c)');
-
-        $('#val-va', $container).text(va !== null ? formatNumber(va, 1) + ' V' : 'N/A');
-        $('#val-vb', $container).text(vb !== null ? formatNumber(vb, 1) + ' V' : 'N/A');
-        $('#val-vc', $container).text(vc !== null ? formatNumber(vc, 1) + ' V' : 'N/A');
-
-        $('#val-power', $container).text(powerTotal !== null ? formatNumber(powerTotal, 1) + ' kW' : 'N/A');
-
-        // Energy Today
-        $('#val-energy-today', $container).text(energyToday !== null ? formatNumber(energyToday, 1) + ' kWh' : 'N/A');
-        $('#val-energy-yesterday', $container).text(energyYesterday !== null ? formatNumber(energyYesterday, 1) + ' kWh' : 'N/A');
-        var pctToday = (energyToday !== null && energyYesterday !== null && energyYesterday > 0) ? ((energyToday / energyYesterday) * 100).toFixed(1) : '0.0';
-        $('#bar-energy-today', $container).css('width', (pctToday !== '0.0' ? Math.min(parseFloat(pctToday), 100) : 0) + '%');
-        $('#pct-energy-today', $container).text(energyToday !== null && energyYesterday !== null ? pctToday + '%' : 'N/A');
-
-        // Energy Week
-        $('#val-energy-week', $container).text(energyWeek !== null ? formatNumber(energyWeek, 1) + ' kWh' : 'N/A');
-        $('#val-energy-lastweek', $container).text(energyLastWeek !== null ? formatNumber(energyLastWeek, 1) + ' kWh' : 'N/A');
-        var pctWeek = (energyWeek !== null && energyLastWeek !== null && energyLastWeek > 0) ? ((energyWeek / energyLastWeek) * 100).toFixed(1) : '0.0';
-        $('#bar-energy-week', $container).css('width', (pctWeek !== '0.0' ? Math.min(parseFloat(pctWeek), 100) : 0) + '%');
-        $('#pct-energy-week', $container).text(energyWeek !== null && energyLastWeek !== null ? pctWeek + '%' : 'N/A');
-
-        // Alarm checking: Unbalance > 12% or Voltage out of 200V-240V
-        var validI = [ia, ib, ic].filter(function(v) {{ return v !== null; }});
-        var validV = [va, vb, vc].filter(function(v) {{ return v !== null; }});
-        var isAlarm = false;
-        if (validI.length === 3) {{
-            var maxI = Math.max(ia, ib, ic);
-            var minI = Math.min(ia, ib, ic);
-            if (maxI > 0 && ((maxI - minI) / maxI) > 0.12) isAlarm = true;
-        }}
-        if (validV.length > 0) {{
-            for (var k = 0; k < validV.length; k++) {{
-                if (validV[k] < 200 || validV[k] > 240) {{
-                    isAlarm = true;
-                    break;
+                if (currentChart) {{
+                    currentChart.options.scales.y.suggestedMax = maxCurrent;
+                    currentChart.data.labels = chartHistoryData.labels;
+                    currentChart.data.datasets[0].data = chartHistoryData.ia;
+                    currentChart.data.datasets[1].data = chartHistoryData.ib;
+                    currentChart.data.datasets[2].data = chartHistoryData.ic;
+                    currentChart.update('none');
                 }}
             }}
         }}
 
-        if (isAlarm) {{
-            $('#alarm-box', $container).css('display', 'flex');
-        }} else {{
-            $('#alarm-box', $container).css('display', 'none');
-        }}
+        renderTelemetryMap();
 
-        // Add to Chart Data buffer
-        if (ia !== null || ib !== null || ic !== null) {{
-            var timeLabel = new Date().toLocaleTimeString([], {{ hour: '2-digit', minute: '2-digit', second: '2-digit' }});
-            chartHistoryData.labels.push(timeLabel);
-            chartHistoryData.ia.push(ia !== null ? ia : 0);
-            chartHistoryData.ib.push(ib !== null ? ib : 0);
-            chartHistoryData.ic.push(ic !== null ? ic : 0);
-
-            if (chartHistoryData.labels.length > 15) {{
-                chartHistoryData.labels.shift();
-                chartHistoryData.ia.shift();
-                chartHistoryData.ib.shift();
-                chartHistoryData.ic.shift();
-            }}
-
-            if (currentChart) {{
-                currentChart.options.scales.y.suggestedMax = maxCurrent;
-                currentChart.data.labels = chartHistoryData.labels;
-                currentChart.data.datasets[0].data = chartHistoryData.ia;
-                currentChart.data.datasets[1].data = chartHistoryData.ib;
-                currentChart.data.datasets[2].data = chartHistoryData.ic;
-                currentChart.update('none');
+        // REST API Fallback: Automatically query ALL latest telemetry keys directly from ThingsBoard server
+        if (!isFunctionPreview && self.ctx.defaultSubscription && self.ctx.defaultSubscription.datasources.length > 0) {{
+            var ds0 = self.ctx.defaultSubscription.datasources[0];
+            if (ds0.entityId && ds0.entityType) {{
+                var http = self.ctx.http || (self.ctx.$scope && self.ctx.$scope.$injector ? self.ctx.$scope.$injector.get('$http') : null);
+                if (http && !self.ctx._fetchedLatestApi) {{
+                    self.ctx._fetchedLatestApi = true;
+                    var apiUrl = '/api/plugins/telemetry/' + ds0.entityType + '/' + ds0.entityId + '/values/timeseries/latest';
+                    http.get(apiUrl).then(function(res) {{
+                        var latestObj = (res && res.data) ? res.data : res;
+                        if (latestObj) {{
+                            for (var key in latestObj) {{
+                                if (latestObj.hasOwnProperty(key)) {{
+                                    var arr = latestObj[key];
+                                    if (arr && arr.length > 0) {{
+                                        var val = arr[arr.length - 1].value;
+                                        dataMap[normalizeKey(key)] = val;
+                                    }}
+                                }}
+                            }}
+                            renderTelemetryMap();
+                        }}
+                    }}).catch(function(e) {{}});
+                }}
             }}
         }}
     }}
