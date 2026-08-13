@@ -1538,7 +1538,7 @@ def generate_electric_3phase_widget(theme_mode="dual"):
                 var http = self.ctx.http || (self.ctx.$scope && self.ctx.$scope.$injector ? self.ctx.$scope.$injector.get('$http') : null);
                 if (http && !self.ctx._fetchedLatestApi) {{
                     self.ctx._fetchedLatestApi = true;
-                    var apiUrl = '/api/plugins/telemetry/' + ds0.entityType + '/' + ds0.entityId + '/values/timeseries/latest';
+                    var apiUrl = '/api/plugins/telemetry/' + ds0.entityType + '/' + ds0.entityId + '/values/timeseries';
                     function handleLatestData(latestObj) {{
                         if (latestObj) {{
                             for (var key in latestObj) {{
@@ -1554,7 +1554,8 @@ def generate_electric_3phase_widget(theme_mode="dual"):
                         }}
                     }}
 
-                    var req = http.get(apiUrl);
+                    var httpOpts = {{ headers: {{ ignoreErrors: 'true' }} }};
+                    var req = http.get(apiUrl, httpOpts);
                     if (req && typeof req.subscribe === 'function') {{
                         req.subscribe(function(res) {{
                             handleLatestData(res && res.data ? res.data : res);
@@ -1667,6 +1668,9 @@ self.typeParameters = function() {{
     # 13 Function DataKeys with settings: { hideDataByDefault: False }
     data_keys_config = [
         {"name": "maxCurrent", "type": "function", "label": "maxCurrent", "settings": {"hideDataByDefault": False}, "funcBody": "return 75.0;"},
+        {"name": "Current_A", "type": "function", "label": "Current_A", "settings": {"hideDataByDefault": False}, "funcBody": "return (44 + Math.random()*3).toFixed(1);"},
+        {"name": "Current_B", "type": "function", "label": "Current_B", "settings": {"hideDataByDefault": False}, "funcBody": "return (43.5 + Math.random()*3).toFixed(1);"},
+        {"name": "Current_C", "type": "function", "label": "Current_C", "settings": {"hideDataByDefault": False}, "funcBody": "return (45 + Math.random()*3).toFixed(1);"},
         {"name": "currentA", "type": "function", "label": "currentA", "settings": {"hideDataByDefault": False}, "funcBody": "return (44 + Math.random()*3).toFixed(1);"},
         {"name": "currentB", "type": "function", "label": "currentB", "settings": {"hideDataByDefault": False}, "funcBody": "return (43.5 + Math.random()*3).toFixed(1);"},
         {"name": "currentC", "type": "function", "label": "currentC", "settings": {"hideDataByDefault": False}, "funcBody": "return (45 + Math.random()*3).toFixed(1);"},
