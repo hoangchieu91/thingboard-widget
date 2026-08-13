@@ -1710,7 +1710,24 @@ self.typeParameters = function() {{
             "templateCss": card_css,
             "controllerScript": controller_js,
             "settingsDirective": "tb-html-card-widget-settings",
-            "settingsForm": [],
+            "settingsForm": [
+                {
+                    "id": "maxCurrent",
+                    "name": "Dòng điện tối đa (Max Current - A)",
+                    "type": "number",
+                    "default": 75,
+                    "required": False,
+                    "fieldClass": "flex"
+                },
+                {
+                    "id": "widgetTitle",
+                    "name": "Tên đồng hồ tùy chỉnh (Tùy chọn)",
+                    "type": "text",
+                    "default": "",
+                    "required": False,
+                    "fieldClass": "flex"
+                }
+            ],
             "defaultConfig": json.dumps(default_config),
             "typeParameters": {
                 "maxDatasources": 1,
