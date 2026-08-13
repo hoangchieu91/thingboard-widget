@@ -49,8 +49,13 @@ def main():
         sys.exit(1)
     print("   -> PASS: Zero syntax/parser errors detected.")
 
-    # 2. Check DataKeys & Settings
-    print("2. Checking ThingsBoard Rules (DataKeys & settings)...")
+    # 2. Check DataKeys & ThingsBoard Anti-Patterns
+    print("2. Checking ThingsBoard Rules & Anti-Patterns...")
+    import re
+    if re.search(r'http\.get\([^)]+\)\.then\(', script):
+        print("❌ TEST FAILED AT STEP 2: ANTI-PATTERN DETECTED! Calling '.then()' directly on 'http.get()' instead of '.subscribe()' for ThingsBoard 4.x RxJS Observable!")
+        sys.exit(1)
+
     default_cfg_raw = desc.get("defaultConfig", "{}")
     try:
         def_cfg = json.loads(default_cfg_raw)

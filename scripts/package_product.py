@@ -29,17 +29,30 @@ def validate_js_syntax(script_content):
 def validate_tb_rules(data):
     """Validate ThingsBoard Gold Rules & Anti-Patterns."""
     issues = []
+    errors = []
     desc = data.get("descriptor", {})
     script = desc.get("controllerScript", "")
 
     if not script or not script.strip():
-        issues.append("controllerScript is empty!")
+        errors.append("controllerScript is empty!")
 
     # Check for string 'version' top-level
     if "version" in data and isinstance(data["version"], str):
         issues.append("String 'version' found in top-level JSON (must be Long or omitted)")
 
-    return issues
+    # Anti-Pattern Check: Calling .then() directly on http.get() without checking .subscribe()
+    import re
+    if re.search(r'http\.get\([^)]+\)\.then\(', script):
+        errors.append("Anti-Pattern Detected: Calling '.then()' directly on 'http.get()'! In ThingsBoard 4.x, Angular HttpClient returns an RxJS Observable which requires '.subscribe()' instead of '.then()'.")
+
+    # Anti-Pattern Check: Unscoped jQuery selectors
+    unscoped_jquery = re.findall(r'\$\([\'"][^\'"]+[\'"]\)(?!\.text|\.val|\.html|\.css|\.attr|\.on|\.off|\.append|\.find|\.addClass|\.removeClass|\.css|\.parent)', script)
+    # Filter out scoped ones like $('#id', $container)
+    unscoped_matches = re.findall(r'\$\([\'"]#[a-zA-Z0-9_-]+[\'"]\)(?!\s*,\s*\$container)', script)
+    if unscoped_matches:
+        issues.append(f"Potential Unscoped jQuery Selector found: {unscoped_matches[:3]}. Always pass $container context: $('#id', $container)")
+
+    return issues, errors
 
 def main():
     parser = argparse.ArgumentParser(description="Package Commercial Widget with Versioning & Auto Validation")
@@ -65,8 +78,13 @@ def main():
     print("   -> JS Syntax OK! (Zero parser errors)")
 
     # 2. Validate ThingsBoard Rules
-    print("2. Validating ThingsBoard Gold Rules...")
-    issues = validate_tb_rules(data)
+    print("2. Validating ThingsBoard Gold Rules & Anti-Patterns...")
+    issues, errors = validate_tb_rules(data)
+    if errors:
+        for err in errors:
+            print(f"   -> ❌ CRITICAL ANTI-PATTERN ERROR: {err}")
+        print("❌ PACKAGING ABORTED DUE TO THINGSBOARD ANTI-PATTERN ERRORS!")
+        sys.exit(1)
     if issues:
         for issue in issues:
             print(f"   -> ⚠️ Rule Warning: {issue}")
