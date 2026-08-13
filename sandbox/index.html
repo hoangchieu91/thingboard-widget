@@ -294,6 +294,37 @@
                 getMaterialColor: function(i) { return '#58a6ff'; }
             };
 
+            const mockHttp = {
+                get: function(url, options) {
+                    log(`[Mock HTTP GET] ${url}`, 'info');
+                    const mockPayload = {
+                        data: {
+                            "Current_A": [{ value: "650" }],
+                            "Current_B": [{ value: "655" }],
+                            "Current_C": [{ value: "660" }],
+                            "currentA": [{ value: "650" }],
+                            "currentB": [{ value: "655" }],
+                            "currentC": [{ value: "660" }],
+                            "voltageA": [{ value: "220" }],
+                            "powerTotal": [{ value: "35.5" }],
+                            "energyTotal": [{ value: "125000" }]
+                        }
+                    };
+                    return {
+                        subscribe: function(onSuccess, onError) {
+                            if (typeof onSuccess === 'function') onSuccess(mockPayload);
+                        },
+                        then: function(onSuccess, onError) {
+                            if (typeof onSuccess === 'function') onSuccess(mockPayload);
+                            return this;
+                        },
+                        catch: function(onError) {
+                            return this;
+                        }
+                    };
+                }
+            };
+
             const mockServicesMap = new Map([
                 ['utils', 'utilsServiceToken']
             ]);
@@ -302,6 +333,9 @@
                 get: function(token) {
                     if (token === 'utilsServiceToken' || token === 'utils') {
                         return mockUtils;
+                    }
+                    if (token === '$http') {
+                        return mockHttp;
                     }
                     return {
                         instant: function(k) { return k; }
@@ -319,6 +353,7 @@
                 $container: mountEl,
                 $scope: mockScope,
                 $injector: mockInjector,
+                http: mockHttp,
                 servicesMap: mockServicesMap,
                 utils: mockUtils,
                 data: mockData,
