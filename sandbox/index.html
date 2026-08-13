@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThingsBoard 4.x Faithful Offline Editor & Sandbox</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0d1117; color: #c9d1d9; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        header { background: #161b22; border-bottom: 1px solid #30363d; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
+        header h1 { font-size: 16px; color: #58a6ff; display: flex; align-items: center; gap: 8px; }
+        .controls-header { display: flex; gap: 10px; align-items: center; }
+        button { background: #238636; color: #fff; border: none; padding: 7px 14px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; }
+        button:hover { background: #2ea043; }
+        button.secondary { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; }
+        button.secondary:hover { background: #30363d; }
+        .tab-bar { display: flex; background: #161b22; border-bottom: 1px solid #30363d; padding: 0 10px; justify-content: space-between; }
+        .tab-group { display: flex; }
+        .tab-btn { background: transparent; border: none; color: #8b949e; padding: 10px 16px; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; }
+        .tab-btn.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+        .workbench { display: flex; flex: 1; height: calc(100vh - 95px); background: #0d1117; position: relative; }
+        .editor-pane { flex: 1; display: flex; flex-direction: column; border-right: 1px solid #30363d; }
+        .preview-pane { flex: 1; display: flex; flex-direction: column; background: #161b22; position: relative; }
+        .pane-header { background: #161b22; padding: 8px 12px; font-size: 12px; font-weight: 700; color: #8b949e; text-transform: uppercase; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+        textarea { flex: 1; background: #0d1117; color: #58a6ff; font-family: "Fira Code", "Courier New", monospace; font-size: 13px; border: none; padding: 12px; resize: none; outline: none; line-height: 1.5; }
+        .tab-content { display: none; flex: 1; flex-direction: column; }
+        .tab-content.active { display: flex; }
+        
+        .preview-viewport-wrapper { flex: 1; padding: 20px; overflow: auto; display: flex; justify-content: center; align-items: center; background: #0d1117; width: 100%; }
+        #widget-mount { width: 100%; height: 100%; min-height: 400px; background: #0d1117; border: 1px dashed #30363d; border-radius: 8px; transition: all 0.3s ease; }
+        
+        .viewport-controls { display: flex; gap: 8px; align-items: center; }
+        .viewport-btn { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 4px 10px; font-size: 11px; border-radius: 4px; cursor: pointer; }
+        .viewport-btn.active { background: #1f6beb; color: #fff; border-color: #388bfd; }
+
+        .console-output { background: #000; color: #00ff66; font-family: monospace; font-size: 12px; padding: 10px; flex: 1; overflow-y: auto; white-space: pre-wrap; }
+        .error-banner { background: #781212; color: #fff; padding: 10px 14px; font-size: 13px; display: none; font-weight: 600; }
+        .telemetry-controls { padding: 10px; background: #161b22; border-top: 1px solid #30363d; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .telemetry-item { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+        .telemetry-item input { width: 80px; background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 4px; border-radius: 4px; }
+        input[type="file"] { display: none; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>⚡ ThingsBoard 4.x Faithful Offline Editor & AI Workbench</h1>
+        <div class="controls-header">
+            <button class="secondary" onclick="document.getElementById('file-input').click()">📂 Load Widget JSON File</button>
+            <input type="file" id="file-input" accept=".json" onchange="loadWidgetFile(event)">
+            <button onclick="exportAIDiagnosticReport()">📋 Export AI Report (/tmp/sandbox_widget_report.json)</button>
+            <button onclick="runWidget()">▶ Execute & Render (Ctrl + Enter)</button>
+        </div>
+    </header>
+
+    <div class="error-banner" id="error-banner"></div>
+
+    <div class="tab-bar">
+        <div class="tab-group">
+            <button class="tab-btn active" onclick="switchMainTab('split')">🔲 Split Editor & Preview</button>
+            <button class="tab-btn" onclick="switchMainTab('fullscreen-preview')">🖼️ Dedicated Fullscreen Preview</button>
+            <button class="tab-btn" onclick="switchMainTab('json-tab')">JSON Editor</button>
+            <button class="tab-btn" onclick="switchMainTab('html-tab')">HTML Editor</button>
+            <button class="tab-btn" onclick="switchMainTab('css-tab')">CSS Editor</button>
+            <button class="tab-btn" onclick="switchMainTab('js-tab')">JS Controller</button>
+        </div>
+        <div class="viewport-controls">
+            <span style="font-size: 11px; color: #8b949e;">Viewport:</span>
+            <button class="viewport-btn active" onclick="setViewport('100%', '100%')">Full 100%</button>
+            <button class="viewport-btn" onclick="setViewport('800px', '550px')">Card (800x550)</button>
+            <button class="viewport-btn" onclick="setViewport('375px', '667px')">Mobile (375x667)</button>
+        </div>
+    </div>
+
+    <div class="workbench" id="workbench-container">
+        <!-- Editor Pane -->
+        <div class="editor-pane" id="editor-pane">
+            <div class="tab-content active" id="tab-json">
+                <div class="pane-header">Widget JSON Definition</div>
+                <textarea id="code-json" placeholder="Paste full ThingsBoard Widget JSON here..."></textarea>
+            </div>
+            <div class="tab-content" id="tab-html">
+                <div class="pane-header">HTML Template (cardHtml)</div>
+                <textarea id="code-html" placeholder="HTML Markup..."></textarea>
+            </div>
+            <div class="tab-content" id="tab-css">
+                <div class="pane-header">CSS Styling (cardCss)</div>
+                <textarea id="code-css" placeholder="CSS Styling..."></textarea>
+            </div>
+            <div class="tab-content" id="tab-js">
+                <div class="pane-header">Javascript Controller (self.onInit)</div>
+                <textarea id="code-js" placeholder="Javascript Controller..."></textarea>
+            </div>
+        </div>
+
+        <!-- Preview Pane -->
+        <div class="preview-pane" id="preview-pane">
+            <div class="pane-header">
+                <span>Live Preview Frame (ThingsBoard Engine)</span>
+                <span id="widget-name-display" style="color: #58a6ff;">-</span>
+            </div>
+
+            <div class="preview-viewport-wrapper">
+                <div id="widget-mount"></div>
+            </div>
+
+            <div class="telemetry-controls">
+                <span style="font-weight: 700; color: #58a6ff; font-size: 12px;">Telemetry Stream:</span>
+                <div id="dynamic-telemetry-inputs" style="display: flex; gap: 10px; flex-wrap: wrap;"></div>
+                <button class="secondary" onclick="toggleAutoStream()">Toggle Live Stream (1s)</button>
+            </div>
+
+            <div class="pane-header">Engine Log Console</div>
+            <div class="console-output" id="console-log">Ready. Load a Widget JSON or click Run!</div>
+        </div>
+    </div>
+
+    <script>
+        let currentWidgetInstance = null;
+        let autoStreamInterval = null;
+        let activeWidgetJSON = null;
+
+        let executionLogs = [];
+        let executionErrors = [];
+
+        function log(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const entry = `[${time}] [${type.toUpperCase()}] ${msg}`;
+            executionLogs.push(entry);
+
+            const consoleEl = document.getElementById('console-log');
+            consoleEl.innerHTML += `${entry}\n`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+        }
+
+        function showError(msg) {
+            executionErrors.push(msg);
+            const errBanner = document.getElementById('error-banner');
+            errBanner.style.display = 'block';
+            errBanner.innerText = '⚠️ ' + msg;
+            log(msg, 'error');
+            postAIDiagnosticReport();
+        }
+
+        function clearError() {
+            document.getElementById('error-banner').style.display = 'none';
+        }
+
+        function setViewport(w, h) {
+            $('.viewport-btn').removeClass('active');
+            $(`.viewport-btn:contains('${w === '100%' ? 'Full' : w.includes('800') ? 'Card' : 'Mobile'}')`).addClass('active');
+            const mount = $('#widget-mount');
+            mount.css({ width: w, height: h });
+        }
+
+        function switchMainTab(mode) {
+            $('.tab-group .tab-btn').removeClass('active');
+            const editorPane = $('#editor-pane');
+            const previewPane = $('#preview-pane');
+
+            $('.tab-content').removeClass('active');
+
+            if (mode === 'split') {
+                $(`.tab-group .tab-btn:contains('Split')`).addClass('active');
+                editorPane.css('display', 'flex');
+                previewPane.css('display', 'flex');
+                $('#tab-json').addClass('active');
+            } else if (mode === 'fullscreen-preview') {
+                $(`.tab-group .tab-btn:contains('Dedicated Fullscreen')`).addClass('active');
+                editorPane.css('display', 'none');
+                previewPane.css('display', 'flex');
+            } else {
+                const sub = mode.replace('-tab', '');
+                $(`.tab-group .tab-btn:contains('${sub.toUpperCase()}')`).addClass('active');
+                editorPane.css('display', 'flex');
+                previewPane.css('display', 'flex');
+                $(`#tab-${sub}`).addClass('active');
+            }
+        }
+
+        // Mock cssjs parser
+        window.cssjs = function() {
+            this.createStyleElement = function(name, cssText) {
+                let style = document.getElementById(name);
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = name;
+                    document.head.appendChild(style);
+                }
+                style.innerHTML = cssText;
+            };
+        };
+
+        function loadWidgetFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#code-json').val(e.target.result);
+                parseJSONToTabs();
+                runWidget();
+            };
+            reader.readAsText(file);
+        }
+
+        function parseJSONToTabs() {
+            try {
+                const jsonText = $('#code-json').val();
+                if (!jsonText.trim()) return;
+                const widgetObj = JSON.parse(jsonText);
+                activeWidgetJSON = widgetObj;
+
+                const desc = widgetObj.descriptor || {};
+                $('#widget-name-display').text(widgetObj.name || 'Custom Widget');
+
+                $('#code-js').val(desc.controllerScript || '');
+
+                let defCfg = {};
+                if (desc.defaultConfig) {
+                    try { defCfg = JSON.parse(desc.defaultConfig); } catch(e) { defCfg = {}; }
+                }
+
+                const cardHtml = (defCfg.settings && defCfg.settings.cardHtml) ? defCfg.settings.cardHtml : desc.templateHtml || '';
+                const cardCss = (defCfg.settings && defCfg.settings.cardCss) ? defCfg.settings.cardCss : desc.templateCss || '';
+
+                $('#code-html').val(cardHtml);
+                $('#code-css').val(cardCss);
+
+                buildDynamicTelemetryInputs(defCfg);
+                log(`Loaded Widget JSON: ${widgetObj.name || 'Unnamed'}`);
+            } catch(e) {
+                showError('Invalid Widget JSON format: ' + e.message);
+            }
+        }
+
+        function buildDynamicTelemetryInputs(defCfg) {
+            const container = $('#dynamic-telemetry-inputs');
+            container.empty();
+
+            if (defCfg.datasources && defCfg.datasources.length > 0) {
+                const keys = defCfg.datasources[0].dataKeys || [];
+                keys.forEach(k => {
+                    let initialVal = 100;
+                    if (k.funcBody) {
+                        try {
+                            const f = new Function(k.funcBody);
+                            initialVal = f();
+                        } catch(e) {}
+                    }
+                    if (typeof initialVal === 'number') initialVal = initialVal.toFixed(1);
+                    container.append(`
+                        <div class="telemetry-item">
+                            <label>${k.label || k.name}:</label>
+                            <input type="text" data-key="${k.name}" value="${initialVal}" onchange="triggerDataUpdate()">
+                        </div>
+                    `);
+                });
+            }
+        }
+
+        function createFaithfulTBContext() {
+            const mountEl = $('#widget-mount');
+            mountEl.empty();
+
+            const cardHtml = $('#code-html').val();
+            const cardCss = $('#code-css').val();
+
+            const mockData = [];
+            $('#dynamic-telemetry-inputs input').each(function() {
+                const kName = $(this).attr('data-key');
+                const rawVal = $(this).val();
+                const numVal = isNaN(Number(rawVal)) ? rawVal : Number(rawVal);
+
+                mockData.push({
+                    datasource: {
+                        entityName: 'INV_SOLAR_DEMO_01',
+                        entityLabel: 'Inverter Demo 01',
+                        entityId: 'demo-id-123',
+                        entityType: 'DEVICE'
+                    },
+                    dataKey: {
+                        name: kName,
+                        label: kName,
+                        settings: { hideDataByDefault: false }
+                    },
+                    data: [[Date.now(), numVal]]
+                });
+            });
+
+            // Mock ThingsBoard Angular Utilities & Injector
+            const mockUtils = {
+                customTranslation: function(key, defaultVal) { return defaultVal || key; },
+                getMaterialColor: function(i) { return '#58a6ff'; }
+            };
+
+            const mockServicesMap = new Map([
+                ['utils', 'utilsServiceToken']
+            ]);
+
+            const mockInjector = {
+                get: function(token) {
+                    if (token === 'utilsServiceToken' || token === 'utils') {
+                        return mockUtils;
+                    }
+                    return {
+                        instant: function(k) { return k; }
+                    };
+                }
+            };
+
+            const mockScope = {
+                $injector: mockInjector,
+                $digest: function() {},
+                $apply: function() {}
+            };
+
+            return {
+                $container: mountEl,
+                $scope: mockScope,
+                $injector: mockInjector,
+                servicesMap: mockServicesMap,
+                utils: mockUtils,
+                data: mockData,
+                settings: {
+                    cardHtml: cardHtml,
+                    cardCss: cardCss,
+                    widgetTitle: 'SOLAR INVERTER DETAIL'
+                },
+                defaultSubscription: {
+                    datasources: [{
+                        entityName: 'INV_SOLAR_DEMO_01',
+                        entityLabel: 'Inverter Demo 01',
+                        entityId: 'demo-id-123',
+                        entityType: 'DEVICE'
+                    }]
+                },
+                actionsApi: {
+                    getActionDescriptors: function() { return [{ name: 'elementClick' }]; },
+                    handleWidgetAction: function(evt, desc, entityId, entityName) {
+                        log(`[Action Triggered] openState for Entity: ${JSON.stringify(entityId)}`, 'action');
+                    }
+                },
+                widget: { id: 'mock-widget-1' },
+                varsRegex: /\$\{([^\}]*)\}/g
+            };
+        }
+
+        function runWidget() {
+            clearError();
+            executionLogs = [];
+            executionErrors = [];
+            log('Starting ThingsBoard Widget Execution Engine...');
+
+            try {
+                const ctx = createFaithfulTBContext();
+                const jsCode = $('#code-js').val();
+
+                const widgetInstance = {};
+                widgetInstance.ctx = ctx;
+
+                const execFunction = new Function('self', jsCode);
+                execFunction(widgetInstance);
+
+                if (typeof widgetInstance.onInit === 'function') {
+                    widgetInstance.onInit();
+                    log('self.onInit() completed cleanly!');
+                } else {
+                    showError('Missing self.onInit = function() {} in Controller Script!');
+                }
+
+                if (typeof widgetInstance.onDataUpdated === 'function') {
+                    widgetInstance.onDataUpdated();
+                    log('self.onDataUpdated() completed cleanly!');
+                }
+
+                currentWidgetInstance = widgetInstance;
+                postAIDiagnosticReport();
+            } catch (e) {
+                showError(e.stack || e.toString());
+            }
+        }
+
+        function triggerDataUpdate() {
+            if (currentWidgetInstance && typeof currentWidgetInstance.onDataUpdated === 'function') {
+                const ctx = currentWidgetInstance.ctx;
+                let idx = 0;
+                $('#dynamic-telemetry-inputs input').each(function() {
+                    const rawVal = $(this).val();
+                    const numVal = isNaN(Number(rawVal)) ? rawVal : Number(rawVal);
+                    if (ctx.data[idx]) {
+                        ctx.data[idx].data = [[Date.now(), numVal]];
+                    }
+                    idx++;
+                });
+
+                try {
+                    currentWidgetInstance.onDataUpdated();
+                    log('onDataUpdated() triggered with new Telemetry values!');
+                } catch (e) {
+                    showError('Error during onDataUpdated: ' + (e.stack || e.toString()));
+                }
+            }
+        }
+
+        function toggleAutoStream() {
+            if (autoStreamInterval) {
+                clearInterval(autoStreamInterval);
+                autoStreamInterval = null;
+                log('Stopped live telemetry streaming.');
+            } else {
+                autoStreamInterval = setInterval(() => {
+                    $('#dynamic-telemetry-inputs input').each(function() {
+                        const curVal = Number($(this).val());
+                        if (!isNaN(curVal)) {
+                            const variation = (Math.random() * 4 - 2).toFixed(1);
+                            const newVal = Math.max(0, curVal + Number(variation)).toFixed(1);
+                            $(this).val(newVal);
+                        }
+                    });
+                    triggerDataUpdate();
+                }, 1000);
+                log('Started live telemetry streaming (1s interval).');
+            }
+        }
+
+        function postAIDiagnosticReport() {
+            const report = {
+                timestamp: new Date().toISOString(),
+                widgetName: $('#widget-name-display').text(),
+                hasErrors: executionErrors.length > 0,
+                errors: executionErrors,
+                logs: executionLogs.slice(-40),
+                domHtml: $('#widget-mount').html()
+            };
+
+            fetch('/api/log_report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(report)
+            }).then(() => console.log('AI Report posted')).catch(e => console.error(e));
+        }
+
+        function exportAIDiagnosticReport() {
+            postAIDiagnosticReport();
+            alert('✅ AI Diagnostic Report exported to: /tmp/sandbox_widget_report.json');
+        }
+
+        $('#code-json').on('input', function() {
+            parseJSONToTabs();
+        });
+
+        $(document).keydown(function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.keyCode === 13) {
+                runWidget();
+            }
+        });
+    </script>
+</body>
+</html>

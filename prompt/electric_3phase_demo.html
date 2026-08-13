@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThingsBoard 3-Phase Meter Widget</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-blue: #38bdf8;
+            --phase-a: #ef4444;
+            --phase-b: #eab308;
+            --phase-c: #3b82f6;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .widget-container {
+            width: 100%;
+            max-width: 720px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            padding: 20px;
+            box-sizing: border-box;
+            border: 1px solid #334155;
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 12px;
+        }
+
+        .widget-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Thẻ hiển thị số điện tổng tích lũy đối chiếu đồng hồ thật */
+        .total-meter-box {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            border: 1px solid var(--accent-blue);
+            border-radius: 10px;
+            padding: 10px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .total-meter-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .total-meter-label span:last-child {
+            color: #38bdf8;
+            font-size: 10px;
+        }
+
+        .total-meter-value {
+            font-size: 22px;
+            font-weight: 800;
+            color: #f8fafc;
+            letter-spacing: 1px;
+            font-family: monospace;
+        }
+
+        .view-switcher {
+            display: flex;
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 4px;
+            border: 1px solid #334155;
+        }
+
+        .btn-switch {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            font-size: 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-switch.active {
+            background: var(--accent-blue);
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .view-content {
+            display: none;
+        }
+
+        .view-content.active {
+            display: block;
+        }
+
+        /* Lưới hiển thị dòng điện & điện áp 3 pha */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .phase-card {
+            background: #0f172a;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phase-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+
+        .phase-card.phase-a::before {
+            background-color: var(--phase-a);
+        }
+
+        .phase-card.phase-b::before {
+            background-color: var(--phase-b);
+        }
+
+        .phase-card.phase-c::before {
+            background-color: var(--phase-c);
+        }
+
+        .phase-title {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .metric-row span:first-child {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .gauge-value {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* Thanh progress bar cho dòng tải */
+        .progress-container {
+            background: #334155;
+            border-radius: 4px;
+            height: 5px;
+            width: 100%;
+            margin: 8px 0 6px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.4s ease, background-color 0.4s ease;
+            border-radius: 4px;
+        }
+
+        .percentage-text {
+            font-size: 10px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Panel điện năng tiêu thụ (Mở rộng tràn màn hình) */
+        .energy-panel {
+            background: #0f172a;
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid #334155;
+            margin-bottom: 12px;
+        }
+
+        .energy-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 8px;
+        }
+
+        .energy-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .energy-card {
+            background: #1e293b;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+
+        .energy-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 8px;
+        }
+
+        .energy-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        .energy-val {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        /* Thanh bar so sánh tiến độ điện năng */
+        .energy-progress-container {
+            background: #334155;
+            border-radius: 6px;
+            height: 8px;
+            width: 100%;
+            margin: 10px 0 6px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .energy-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            border-radius: 6px;
+            transition: width 0.4s ease;
+        }
+
+        .energy-comparison-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .energy-comparison-info strong {
+            color: #f8fafc;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 240px;
+            width: 100%;
+        }
+
+        .alarm-badge {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            border: 1px solid var(--danger);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="widget-container">
+        <div class="widget-header">
+            <h3 class="widget-title">
+                <span>⚡</span> Đồng hồ đo điện 3 Pha & Năng lượng
+            </h3>
+            <div class="view-switcher">
+                <button class="btn-switch active" onclick="switchView('gauge')">Thông số & Điện năng</button>
+                <button class="btn-switch" onclick="switchView('chart')">Biểu đồ thời gian</button>
+            </div>
+        </div>
+
+        <!-- Thẻ hiển thị số điện tổng tích lũy đối chiếu thực tế -->
+        <div class="total-meter-box">
+            <div class="total-meter-label">
+                <span>⚡ CHỈ SỐ ĐIỆN NĂNG TỔNG (LIFETIME)</span>
+                <span>Dùng để đối chiếu trực tiếp với đồng hồ cơ/điện tử tại tủ điện</span>
+            </div>
+            <div class="total-meter-value" id="val-total-energy">124,582.6 kWh</div>
+        </div>
+
+        <!-- Chế độ 1: Dòng điện, Điện áp và Điện năng tiêu thụ so sánh dạng thanh tiến trình -->
+        <div id="view-gauge" class="view-content active">
+            <!-- 3 Pha: Dòng điện & Điện áp tương ứng -->
+            <div class="grid-3">
+                <!-- Pha A -->
+                <div class="phase-card phase-a">
+                    <div class="phase-title"><span>PHA A</span> <span style="color:var(--phase-a);">L1</span></div>
+                    <div class="metric-row">
+                        <span>Dòng điện:</span>
+                        <strong class="gauge-value" id="val-ia">45.2 A</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span>Điện áp ($U_{an}$):</span>
+                        <strong id="val-va" style="color: #f1f5f9;">220.1 V</strong>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="bar-ia" style="width: 60%; background-color: var(--phase-a);">
+                        </div>
+                    </div>
+                    <div class="percentage-text">
+                        <span>Tải (Max 75A)</span>
+                        <span id="pct-ia">60.3%</span>
+                    </div>
+                </div>
+
+                <!-- Pha B -->
+                <div class="phase-card phase-b">
+                    <div class="phase-title"><span>PHA B</span> <span style="color:var(--phase-b);">L2</span></div>
+                    <div class="metric-row">
+                        <span>Dòng điện:</span>
+                        <strong class="gauge-value" id="val-ib">44.8 A</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span>Điện áp ($U_{bn}$):</span>
+                        <strong id="val-vb" style="color: #f1f5f9;">220.5 V</strong>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="bar-ib" style="width: 59%; background-color: var(--phase-b);">
+                        </div>
+                    </div>
+                    <div class="percentage-text">
+                        <span>Tải (Max 75A)</span>
+                        <span id="pct-ib">59.7%</span>
+                    </div>
+                </div>
+
+                <!-- Pha C -->
+                <div class="phase-card phase-c">
+                    <div class="phase-title"><span>PHA C</span> <span style="color:var(--phase-c);">L3</span></div>
+                    <div class="metric-row">
+                        <span>Dòng điện:</span>
+                        <strong class="gauge-value" id="val-ic">46.1 A</strong>
+                    </div>
+                    <div class="metric-row">
+                        <span>Điện áp ($U_{cn}$):</span>
+                        <strong id="val-vc" style="color: #f1f5f9;">220.8 V</strong>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="bar-ic" style="width: 61%; background-color: var(--phase-c);">
+                        </div>
+                    </div>
+                    <div class="percentage-text">
+                        <span>Tải (Max 75A)</span>
+                        <span id="pct-ic">61.5%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Quản lý Điện năng tiêu thụ (Mở rộng toàn khung với thanh tiến trình so với ngày/tuần trước) -->
+            <div class="energy-panel">
+                <div class="energy-title">
+                    <span>📊 Tiến độ Tiêu thụ Điện năng</span>
+                    <span style="font-size: 11px; color: var(--text-secondary);">Công suất hiện tại: <strong
+                            style="color: #f1f5f9;" id="val-power">29.5 kW</strong></span>
+                </div>
+
+                <div class="energy-grid">
+                    <!-- Thẻ Hôm Nay -->
+                    <div class="energy-card">
+                        <div class="energy-header-row">
+                            <span class="energy-label">Hôm nay (0h00 đến hiện tại)</span>
+                            <span class="energy-val" id="val-energy-today">342.5 kWh</span>
+                        </div>
+                        <div class="energy-progress-container">
+                            <div class="energy-progress-bar" id="bar-energy-today" style="width: 87.5%;"></div>
+                        </div>
+                        <div class="energy-comparison-info">
+                            <span>Đã đạt <strong id="pct-energy-today">87.5%</strong> so với tổng cả ngày hôm qua</span>
+                            <span>Tổng qua: <strong id="val-energy-yesterday">391.2 kWh</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Thẻ Tuần Nay -->
+                    <div class="energy-card">
+                        <div class="energy-header-row">
+                            <span class="energy-label">Tuần này (Đến hiện tại)</span>
+                            <span class="energy-val" id="val-energy-week">2,350.0 kWh</span>
+                        </div>
+                        <div class="energy-progress-container">
+                            <div class="energy-progress-bar" id="bar-energy-week" style="width: 74.6%;"></div>
+                        </div>
+                        <div class="energy-comparison-info">
+                            <span>Đã đạt <strong id="pct-energy-week">74.6%</strong> so với tổng cả tuần trước</span>
+                            <span>Tổng tuần trước: <strong id="val-energy-lastweek">3,150.0 kWh</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="alarm-box" style="display: none;" class="alarm-badge">
+                <span>⚠️</span> Cảnh báo: Lệch pha dòng điện hoặc điện áp vượt ngưỡng cho phép!
+            </div>
+        </div>
+
+        <!-- Chế độ 2: Biểu đồ thời gian thực -->
+        <div id="view-chart" class="view-content">
+            <div class="chart-container">
+                <canvas id="currentChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_CURRENT = 75.0;
+
+        // Biến lưu trữ giá trị mô phỏng tăng vĩnh viễn cho điện năng tổng
+        let totalEnergyVal = 124582.6;
+
+        function switchView(type) {
+            const btns = document.querySelectorAll('.btn-switch');
+            btns.forEach(b => b.classList.remove('active'));
+
+            document.querySelectorAll('.view-content').forEach(v => v.classList.remove('active'));
+
+            if (type === 'gauge') {
+                document.getElementById('view-gauge').classList.add('active');
+                event.target.classList.add('active');
+            } else {
+                document.getElementById('view-chart').classList.add('active');
+                event.target.classList.add('active');
+                currentChart.update();
+            }
+        }
+
+        const ctx = document.getElementById('currentChart').getContext('2d');
+        const initialLabels = ['10:00', '10:05', '10:10', '10:15', '10:20', '10:25'];
+
+        const currentChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: initialLabels,
+                datasets: [
+                    { label: 'Pha A (A)', data: [42, 44, 45, 43, 46, 45.2], borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', borderWidth: 2, tension: 0.3, fill: true },
+                    { label: 'Pha B (A)', data: [40, 41, 42, 44, 43, 44.8], borderColor: '#eab308', backgroundColor: 'rgba(234, 179, 8, 0.1)', borderWidth: 2, tension: 0.3, fill: true },
+                    { label: 'Pha C (A)', data: [43, 45, 44, 46, 45, 46.1], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 2, tension: 0.3, fill: true }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#f8fafc', boxWidth: 12, font: { size: 12 } } }
+                },
+                scales: {
+                    x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#334155' } },
+                    y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#334155' }, suggestedMax: MAX_CURRENT }
+                }
+            }
+        });
+
+        function updatePhaseCard(phaseId, value) {
+            const valEl = document.getElementById(`val-${phaseId}`);
+            const barEl = document.getElementById(`bar-${phaseId}`);
+            const pctEl = document.getElementById(`pct-${phaseId}`);
+
+            valEl.innerText = value + ' A';
+            let percent = ((value / MAX_CURRENT) * 100).toFixed(1);
+            if (percent > 100) percent = 100;
+
+            barEl.style.width = percent + '%';
+            pctEl.innerText = percent + '%';
+
+            if (percent > 85) {
+                barEl.style.backgroundColor = 'var(--danger)';
+            } else if (percent > 70) {
+                barEl.style.backgroundColor = 'var(--warning)';
+            } else {
+                if (phaseId === 'ia') barEl.style.backgroundColor = 'var(--phase-a)';
+                if (phaseId === 'ib') barEl.style.backgroundColor = 'var(--phase-b)';
+                if (phaseId === 'ic') barEl.style.backgroundColor = 'var(--phase-c)';
+            }
+        }
+
+        // Mô phỏng cập nhật dữ liệu liên tục từ thiết bị
+        setInterval(() => {
+            let ia = (45 + (Math.random() * 4 - 2)).toFixed(1);
+            let ib = (44 + (Math.random() * 3 - 1.5)).toFixed(1);
+            let ic = (43 + (Math.random() * 8 - 2)).toFixed(1);
+
+            updatePhaseCard('ia', ia);
+            updatePhaseCard('ib', ib);
+            updatePhaseCard('ic', ic);
+
+            // Cập nhật số điện tổng tích lũy tăng dần theo thời gian thực (giống đồng hồ thật)
+            totalEnergyVal += 0.05;
+            document.getElementById('val-total-energy').innerText = totalEnergyVal.toFixed(1) + ' kWh';
+
+            // Cập nhật tiến độ điện năng hôm nay so với hôm qua (Hôm qua tổng 391.2 kWh)
+            let todayVal = 342.5 + (Math.random() * 0.5);
+            let yesterdayTotal = 391.2;
+            let todayPercent = ((todayVal / yesterdayTotal) * 100).toFixed(1);
+
+            document.getElementById('val-energy-today').innerText = todayVal.toFixed(1) + ' kWh';
+            document.getElementById('bar-energy-today').style.width = Math.min(todayPercent, 100) + '%';
+            document.getElementById('pct-energy-today').innerText = todayPercent + '%';
+
+            let maxI = Math.max(ia, ib, ic);
+            let minI = Math.min(ia, ib, ic);
+            let unbalance = (maxI - minI) / maxI;
+
+            const alarmBox = document.getElementById('alarm-box');
+            if (unbalance > 0.12) {
+                alarmBox.style.display = 'flex';
+            } else {
+                alarmBox.style.display = 'none';
+            }
+        }, 2500);
+    </script>
+</body>
+
+</html>
