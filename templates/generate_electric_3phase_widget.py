@@ -1497,9 +1497,28 @@ def generate_electric_3phase_widget(theme_mode="dual"):
         }}
 
         // Add to Chart Data buffer
-            currentChart.data.datasets[1].data = chartHistoryData.ib;
-            currentChart.data.datasets[2].data = chartHistoryData.ic;
-            currentChart.update('none');
+        if (ia !== null || ib !== null || ic !== null) {{
+            var timeLabel = new Date().toLocaleTimeString([], {{ hour: '2-digit', minute: '2-digit', second: '2-digit' }});
+            chartHistoryData.labels.push(timeLabel);
+            chartHistoryData.ia.push(ia !== null ? ia : 0);
+            chartHistoryData.ib.push(ib !== null ? ib : 0);
+            chartHistoryData.ic.push(ic !== null ? ic : 0);
+
+            if (chartHistoryData.labels.length > 15) {{
+                chartHistoryData.labels.shift();
+                chartHistoryData.ia.shift();
+                chartHistoryData.ib.shift();
+                chartHistoryData.ic.shift();
+            }}
+
+            if (currentChart) {{
+                currentChart.options.scales.y.suggestedMax = maxCurrent;
+                currentChart.data.labels = chartHistoryData.labels;
+                currentChart.data.datasets[0].data = chartHistoryData.ia;
+                currentChart.data.datasets[1].data = chartHistoryData.ib;
+                currentChart.data.datasets[2].data = chartHistoryData.ic;
+                currentChart.update('none');
+            }}
         }}
     }}
 
