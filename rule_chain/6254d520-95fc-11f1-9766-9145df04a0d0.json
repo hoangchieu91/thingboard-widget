@@ -1,0 +1,209 @@
+{
+  "entityType" : "RULE_CHAIN",
+  "entity" : {
+    "additionalInfo" : {
+      "description" : "Rule Chain tự động sinh cảnh báo CRITICAL/WARNING cho 4 ngưỡng nhiệt độ LL, L, H, HH với Hysteresis 0.5°C"
+    },
+    "configuration" : { },
+    "debugMode" : false,
+    "externalId" : null,
+    "firstRuleNodeId" : {
+      "entityType" : "RULE_NODE",
+      "id" : "819af770-95fc-11f1-9766-9145df04a0d0"
+    },
+    "id" : {
+      "entityType" : "RULE_CHAIN",
+      "id" : "6254d520-95fc-11f1-9766-9145df04a0d0"
+    },
+    "name" : "Ami-Onsen 4-Threshold Temperature Alarms",
+    "root" : false,
+    "type" : "CORE"
+  },
+  "metaData" : {
+    "connections" : [ {
+      "fromIndex" : 0,
+      "toIndex" : 1,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 0,
+      "toIndex" : 4,
+      "type" : "Attributes Updated"
+    }, {
+      "fromIndex" : 1,
+      "toIndex" : 2,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 1,
+      "toIndex" : 3,
+      "type" : "False"
+    }, {
+      "fromIndex" : 1,
+      "toIndex" : 5,
+      "type" : "Success"
+    } ],
+    "firstNodeIndex" : 0,
+    "nodes" : [ {
+      "additionalInfo" : {
+        "layoutX" : 280,
+        "layoutY" : 150
+      },
+      "configuration" : {
+        "tellFailureIfAttributeNotFound" : false,
+        "sharedAttributeNames" : [ "LL", "L", "H", "HH", "alarm_LL", "alarm_L", "alarm_H", "alarm_HH" ],
+        "fetchTo" : "METADATA",
+        "serverAttributeNames" : [ "LL", "L", "H", "HH", "alarm_LL", "alarm_L", "alarm_H", "alarm_HH" ],
+        "latestTsKeyNames" : [ "alarm_LL", "alarm_L", "alarm_H", "alarm_HH" ]
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "819af770-95fc-11f1-9766-9145df04a0d0"
+      },
+      "name" : "Nạp Ngưỡng Nhiệt Độ (Shared Attributes)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.metadata.TbGetAttributesNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 580,
+        "layoutY" : 150
+      },
+      "configuration" : {
+        "jsScript" : "var temp = msg.temperature;\nif (temp === undefined || temp === null) {\n    return {result: false};\n}\nfunction pick(vals, defVal) {\n    for (var i = 0; i < vals.length; i++) {\n        var v = parseFloat(vals[i]);\n        if (!isNaN(v)) return v;\n    }\n    return defVal;\n}\nvar LL = pick([msg.alarm_LL, metadata.shared_alarm_LL, metadata.shared_LL, metadata.ss_alarm_LL, metadata.ss_LL, metadata.alarm_LL], 5.0);\nvar L  = pick([msg.alarm_L,  metadata.shared_alarm_L,  metadata.shared_L,  metadata.ss_alarm_L,  metadata.ss_L,  metadata.alarm_L], 10.0);\nvar H  = pick([msg.alarm_H,  metadata.shared_alarm_H,  metadata.shared_H,  metadata.ss_alarm_H,  metadata.ss_H,  metadata.alarm_H], 38.0);\nvar HH = pick([msg.alarm_HH, metadata.shared_alarm_HH, metadata.shared_HH, metadata.ss_alarm_HH, metadata.ss_HH, metadata.alarm_HH], 45.0);\n\nmsg.alarm_LL = LL;\nmsg.alarm_L  = L;\nmsg.alarm_H  = H;\nmsg.alarm_HH = HH;\nmsg.alarmType = null;\nmsg.alarmSeverity = null;\n\nif (temp >= HH) {\n    msg.alarmType = 'TEMP_HIGH_HIGH (Quá Nóng Khẩn Cấp)';\n    msg.alarmSeverity = 'CRITICAL';\n} else if (temp <= LL) {\n    msg.alarmType = 'TEMP_LOW_LOW (Quá Lạnh Khẩn Cấp)';\n    msg.alarmSeverity = 'CRITICAL';\n} else if (temp >= H && temp < (HH - 0.5)) {\n    msg.alarmType = 'TEMP_HIGH (Cảnh Báo Nóng)';\n    msg.alarmSeverity = 'WARNING';\n} else if (temp <= L && temp > (LL + 0.5)) {\n    msg.alarmType = 'TEMP_LOW (Cảnh Báo Lạnh)';\n    msg.alarmSeverity = 'WARNING';\n}\nreturn {msg: msg, metadata: metadata, msgType: msgType};"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : {
+        "allEnabled" : false,
+        "allEnabledUntil" : 1786096221862,
+        "failuresEnabled" : true
+      },
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "819b1e80-95fc-11f1-9766-9145df04a0d0"
+      },
+      "name" : "Đánh Giá 4 Ngưỡng Nhiệt Độ (LL, L, H, HH)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 880,
+        "layoutY" : 150
+      },
+      "configuration" : {
+        "alarmDetailsBuildJs" : "return { temperature: msg.temperature, threshold: msg.alarmType };",
+        "useMessageAlarmData" : true,
+        "alarmType" : "${msg.alarmType}",
+        "severity" : "${msg.alarmSeverity}",
+        "propagate" : true,
+        "relationTypes" : [ ]
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : {
+        "allEnabled" : false,
+        "allEnabledUntil" : 1786096221862,
+        "failuresEnabled" : true
+      },
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "819b93b0-95fc-11f1-9766-9145df04a0d0"
+      },
+      "name" : "Tạo Cảnh Báo An Toàn Onsen",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbCreateAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 880,
+        "layoutY" : 280
+      },
+      "configuration" : {
+        "alarmDetailsBuildJs" : "return { temperature: msg.temperature };",
+        "useMessageAlarmData" : true,
+        "alarmType" : "${msg.alarmType}"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : {
+        "allEnabled" : false,
+        "allEnabledUntil" : 1786096221862,
+        "failuresEnabled" : true
+      },
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "819be1d0-95fc-11f1-9766-9145df04a0d0"
+      },
+      "name" : "Xóa Cảnh Báo Khi Nhiệt Độ Trở Về Chuẩn",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbClearAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 580,
+        "layoutY" : 280
+      },
+      "configuration" : {
+        "jsScript" : "return 'AUDIT THRESHOLD | Device: ' + metadata.deviceName + ' | Temp: ' + msg.temperature;"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : {
+        "allEnabled" : false,
+        "allEnabledUntil" : 1786096221862,
+        "failuresEnabled" : true
+      },
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "819c2ff0-95fc-11f1-9766-9145df04a0d0"
+      },
+      "name" : "Ghi Nhật Ký Audit Ngưỡng Cảnh Báo",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbLogNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 580,
+        "layoutY" : 40
+      },
+      "configuration" : {
+        "defaultTTL" : 0,
+        "processingSettings" : {
+          "type" : "ON_EVERY_MESSAGE"
+        }
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "3e3d51d0-d34b-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "Save Threshold Timeseries",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode"
+    } ],
+    "ruleChainConnections" : null
+  },
+  "relations" : [ ],
+  "attributes" : {
+    "SERVER_SCOPE" : [ ]
+  },
+  "calculatedFields" : [ ]
+}
