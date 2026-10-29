@@ -9,7 +9,7 @@
     "externalId" : null,
     "firstRuleNodeId" : {
       "entityType" : "RULE_NODE",
-      "id" : "d30e9700-d34c-11f1-a6d9-970576ca9a33"
+      "id" : "4d876f20-d34d-11f1-a6d9-970576ca9a33"
     },
     "id" : {
       "entityType" : "RULE_CHAIN",
@@ -35,17 +35,41 @@
     }, {
       "fromIndex" : 3,
       "toIndex" : 4,
-      "type" : "Create"
+      "type" : "Create_HH"
     }, {
       "fromIndex" : 3,
       "toIndex" : 5,
-      "type" : "Clear"
+      "type" : "Create_H"
+    }, {
+      "fromIndex" : 3,
+      "toIndex" : 6,
+      "type" : "Create_L"
+    }, {
+      "fromIndex" : 3,
+      "toIndex" : 7,
+      "type" : "Create_LL"
+    }, {
+      "fromIndex" : 3,
+      "toIndex" : 8,
+      "type" : "Clear_HH"
+    }, {
+      "fromIndex" : 3,
+      "toIndex" : 9,
+      "type" : "Clear_H"
+    }, {
+      "fromIndex" : 3,
+      "toIndex" : 10,
+      "type" : "Clear_L"
+    }, {
+      "fromIndex" : 3,
+      "toIndex" : 11,
+      "type" : "Clear_LL"
     } ],
     "firstNodeIndex" : 0,
     "nodes" : [ {
       "additionalInfo" : {
-        "layoutX" : 220,
-        "layoutY" : 150
+        "layoutX" : 200,
+        "layoutY" : 220
       },
       "configuration" : {
         "tellFailureIfAbsent" : false,
@@ -58,15 +82,11 @@
       },
       "configurationVersion" : 1,
       "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1793247176524,
-        "failuresEnabled" : true
-      },
+      "debugSettings" : null,
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "d30e9700-d34c-11f1-a6d9-970576ca9a33"
+        "id" : "4d876f20-d34d-11f1-a6d9-970576ca9a33"
       },
       "name" : "1. Đọc Ngưỡng Cài Đặt (LL, L, H, HH)",
       "queueName" : null,
@@ -75,25 +95,21 @@
       "type" : "org.thingsboard.rule.engine.metadata.TbGetAttributesNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 500,
-        "layoutY" : 150
+        "layoutX" : 480,
+        "layoutY" : 220
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "var t = msg.temperature != null ? Double.parseDouble(msg.temperature.toString()) : null;\nif (t == null) {\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}\n\nvar ll = metadata.ss_alarm_LL != null ? Double.parseDouble(metadata.ss_alarm_LL.toString()) : 5.0;\nvar l  = metadata.ss_alarm_L  != null ? Double.parseDouble(metadata.ss_alarm_L.toString())  : 12.0;\nvar h  = metadata.ss_alarm_H  != null ? Double.parseDouble(metadata.ss_alarm_H.toString())  : 38.0;\nvar hh = metadata.ss_alarm_HH != null ? Double.parseDouble(metadata.ss_alarm_HH.toString()) : 45.0;\n\nmsg.alarm_LL = ll;\nmsg.alarm_L  = l;\nmsg.alarm_H  = h;\nmsg.alarm_HH = hh;\n\nif (t <= ll) {\n    msg.alarmLevel = \"LL (Quá Lạnh Khẩn Cấp <= \" + ll + \"°C)\";\n    msg.alarmCode = \"TEMP_LOW_LOW\";\n    msg.alarmSeverity = \"CRITICAL\";\n    msg.thresholdValue = ll;\n    msg.currentTemp = t;\n    metadata.alarmSeverity = \"CRITICAL\";\n} else if (t >= hh) {\n    msg.alarmLevel = \"HH (Quá Nóng Khẩn Cấp >= \" + hh + \"°C)\";\n    msg.alarmCode = \"TEMP_HIGH_HIGH\";\n    msg.alarmSeverity = \"CRITICAL\";\n    msg.thresholdValue = hh;\n    msg.currentTemp = t;\n    metadata.alarmSeverity = \"CRITICAL\";\n} else if (t <= l) {\n    msg.alarmLevel = \"L (Cảnh Báo Thấp <= \" + l + \"°C)\";\n    msg.alarmCode = \"TEMP_LOW\";\n    msg.alarmSeverity = \"WARNING\";\n    msg.thresholdValue = l;\n    msg.currentTemp = t;\n    metadata.alarmSeverity = \"WARNING\";\n} else if (t >= h) {\n    msg.alarmLevel = \"H (Cảnh Báo Cao >= \" + h + \"°C)\";\n    msg.alarmCode = \"TEMP_HIGH\";\n    msg.alarmSeverity = \"WARNING\";\n    msg.thresholdValue = h;\n    msg.currentTemp = t;\n    metadata.alarmSeverity = \"WARNING\";\n} else {\n    msg.alarmLevel = null;\n    msg.alarmCode = null;\n    msg.alarmSeverity = null;\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
-        "tbelScript" : "var t = msg.temperature != null ? Double.parseDouble(msg.temperature.toString()) : null;\nif (t == null) {\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}\n\nvar ll = metadata.ss_alarm_LL != null ? Double.parseDouble(metadata.ss_alarm_LL.toString()) : 5.0;\nvar l  = metadata.ss_alarm_L  != null ? Double.parseDouble(metadata.ss_alarm_L.toString())  : 12.0;\nvar h  = metadata.ss_alarm_H  != null ? Double.parseDouble(metadata.ss_alarm_H.toString())  : 38.0;\nvar hh = metadata.ss_alarm_HH != null ? Double.parseDouble(metadata.ss_alarm_HH.toString()) : 45.0;\n\nmsg.alarm_LL = ll;\nmsg.alarm_L  = l;\nmsg.alarm_H  = h;\nmsg.alarm_HH = hh;\n\nif (t <= ll) {\n    msg.alarmLevel = \"LL (Quá Lạnh Khẩn Cấp <= \" + ll + \"°C)\";\n    msg.alarmCode = \"TEMP_LOW_LOW\";\n    msg.alarmSeverity = \"CRITICAL\";\n    msg.thresholdValue = ll;\n    msg.currentTemp = t;\n    metadata.alarmSeverity = \"CRITICAL\";\n} else if (t >= hh) {\n    msg.alarmLevel = \"HH (Quá Nóng Khẩn Cấp >= \" + hh + \"°C)\";\n    msg.alarmCode = \"TEMP_HIGH_HIGH\";\n    msg.alarmSeverity = \"CRITICAL\";\n    msg.thresholdValue = hh;\n    msg.currentTemp = t;\n    metadata.alarmSeverity = \"CRITICAL\";\n} else if (t <= l) {\n    msg.alarmLevel = \"L (Cảnh Báo Thấp <= \" + l + \"°C)\";\n    msg.alarmCode = \"TEMP_LOW\";\n    msg.alarmSeverity = \"WARNING\";\n    msg.thresholdValue = l;\n    msg.currentTemp = t;\n    metadata.alarmSeverity = \"WARNING\";\n} else if (t >= h) {\n    msg.alarmLevel = \"H (Cảnh Báo Cao >= \" + h + \"°C)\";\n    msg.alarmCode = \"TEMP_HIGH\";\n    msg.alarmSeverity = \"WARNING\";\n    msg.thresholdValue = h;\n    msg.currentTemp = t;\n    metadata.alarmSeverity = \"WARNING\";\n} else {\n    msg.alarmLevel = null;\n    msg.alarmCode = null;\n    msg.alarmSeverity = null;\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};"
+        "jsScript" : "var t = msg.temperature != null ? Double.parseDouble(msg.temperature.toString()) : null;\nif (t == null) {\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}\n\nvar ll = metadata.ss_alarm_LL != null ? Double.parseDouble(metadata.ss_alarm_LL.toString()) : 5.0;\nvar l  = metadata.ss_alarm_L  != null ? Double.parseDouble(metadata.ss_alarm_L.toString())  : 12.0;\nvar h  = metadata.ss_alarm_H  != null ? Double.parseDouble(metadata.ss_alarm_H.toString())  : 38.0;\nvar hh = metadata.ss_alarm_HH != null ? Double.parseDouble(metadata.ss_alarm_HH.toString()) : 45.0;\n\nmsg.alarm_LL = ll;\nmsg.alarm_L  = l;\nmsg.alarm_H  = h;\nmsg.alarm_HH = hh;\nmsg.currentTemp = Math.round(t * 10.0) / 10.0;\n\nif (t <= ll) {\n    msg.alarmCode = \"LL\";\n    msg.alarmLevel = \"Quá lạnh khẩn cấp - CRITICAL - LL\";\n    msg.alarmSeverity = \"CRITICAL\";\n    msg.thresholdValue = ll;\n    msg.alarmNote = \"Thực tế: \" + msg.currentTemp + \"°C <= Ngưỡng LL: \" + ll + \"°C (L: \" + l + \"°C | H: \" + h + \"°C | HH: \" + hh + \"°C)\";\n} else if (t >= hh) {\n    msg.alarmCode = \"HH\";\n    msg.alarmLevel = \"Quá nóng khẩn cấp - CRITICAL - HH\";\n    msg.alarmSeverity = \"CRITICAL\";\n    msg.thresholdValue = hh;\n    msg.alarmNote = \"Thực tế: \" + msg.currentTemp + \"°C >= Ngưỡng HH: \" + hh + \"°C (LL: \" + ll + \"°C | L: \" + l + \"°C | H: \" + h + \"°C)\";\n} else if (t <= l) {\n    msg.alarmCode = \"L\";\n    msg.alarmLevel = \"Cảnh báo lạnh - WARNING - L\";\n    msg.alarmSeverity = \"WARNING\";\n    msg.thresholdValue = l;\n    msg.alarmNote = \"Thực tế: \" + msg.currentTemp + \"°C <= Ngưỡng L: \" + l + \"°C (LL: \" + ll + \"°C | H: \" + h + \"°C | HH: \" + hh + \"°C)\";\n} else if (t >= h) {\n    msg.alarmCode = \"H\";\n    msg.alarmLevel = \"Cảnh báo nóng - WARNING - H\";\n    msg.alarmSeverity = \"WARNING\";\n    msg.thresholdValue = h;\n    msg.alarmNote = \"Thực tế: \" + msg.currentTemp + \"°C >= Ngưỡng H: \" + h + \"°C (LL: \" + ll + \"°C | L: \" + l + \"°C | HH: \" + hh + \"°C)\";\n} else {\n    msg.alarmCode = \"OK\";\n    msg.alarmLevel = null;\n    msg.alarmSeverity = null;\n    msg.alarmNote = \"Bình thường: \" + msg.currentTemp + \"°C\";\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};",
+        "tbelScript" : "var t = msg.temperature != null ? Double.parseDouble(msg.temperature.toString()) : null;\nif (t == null) {\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}\n\nvar ll = metadata.ss_alarm_LL != null ? Double.parseDouble(metadata.ss_alarm_LL.toString()) : 5.0;\nvar l  = metadata.ss_alarm_L  != null ? Double.parseDouble(metadata.ss_alarm_L.toString())  : 12.0;\nvar h  = metadata.ss_alarm_H  != null ? Double.parseDouble(metadata.ss_alarm_H.toString())  : 38.0;\nvar hh = metadata.ss_alarm_HH != null ? Double.parseDouble(metadata.ss_alarm_HH.toString()) : 45.0;\n\nmsg.alarm_LL = ll;\nmsg.alarm_L  = l;\nmsg.alarm_H  = h;\nmsg.alarm_HH = hh;\nmsg.currentTemp = Math.round(t * 10.0) / 10.0;\n\nif (t <= ll) {\n    msg.alarmCode = \"LL\";\n    msg.alarmLevel = \"Quá lạnh khẩn cấp - CRITICAL - LL\";\n    msg.alarmSeverity = \"CRITICAL\";\n    msg.thresholdValue = ll;\n    msg.alarmNote = \"Thực tế: \" + msg.currentTemp + \"°C <= Ngưỡng LL: \" + ll + \"°C (L: \" + l + \"°C | H: \" + h + \"°C | HH: \" + hh + \"°C)\";\n} else if (t >= hh) {\n    msg.alarmCode = \"HH\";\n    msg.alarmLevel = \"Quá nóng khẩn cấp - CRITICAL - HH\";\n    msg.alarmSeverity = \"CRITICAL\";\n    msg.thresholdValue = hh;\n    msg.alarmNote = \"Thực tế: \" + msg.currentTemp + \"°C >= Ngưỡng HH: \" + hh + \"°C (LL: \" + ll + \"°C | L: \" + l + \"°C | H: \" + h + \"°C)\";\n} else if (t <= l) {\n    msg.alarmCode = \"L\";\n    msg.alarmLevel = \"Cảnh báo lạnh - WARNING - L\";\n    msg.alarmSeverity = \"WARNING\";\n    msg.thresholdValue = l;\n    msg.alarmNote = \"Thực tế: \" + msg.currentTemp + \"°C <= Ngưỡng L: \" + l + \"°C (LL: \" + ll + \"°C | H: \" + h + \"°C | HH: \" + hh + \"°C)\";\n} else if (t >= h) {\n    msg.alarmCode = \"H\";\n    msg.alarmLevel = \"Cảnh báo nóng - WARNING - H\";\n    msg.alarmSeverity = \"WARNING\";\n    msg.thresholdValue = h;\n    msg.alarmNote = \"Thực tế: \" + msg.currentTemp + \"°C >= Ngưỡng H: \" + h + \"°C (LL: \" + ll + \"°C | L: \" + l + \"°C | HH: \" + hh + \"°C)\";\n} else {\n    msg.alarmCode = \"OK\";\n    msg.alarmLevel = null;\n    msg.alarmSeverity = null;\n    msg.alarmNote = \"Bình thường: \" + msg.currentTemp + \"°C\";\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1793247176524,
-        "failuresEnabled" : true
-      },
+      "debugSettings" : null,
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "d30ebe10-d34c-11f1-a6d9-970576ca9a33"
+        "id" : "4d879630-d34d-11f1-a6d9-970576ca9a33"
       },
       "name" : "2. Đánh Giá 4 Ngưỡng Nhiệt Độ (LL / L / H / HH)",
       "queueName" : null,
@@ -102,8 +118,8 @@
       "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 780,
-        "layoutY" : 150
+        "layoutX" : 760,
+        "layoutY" : 220
       },
       "configuration" : {
         "defaultTTL" : 0,
@@ -114,15 +130,11 @@
       },
       "configurationVersion" : 1,
       "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1793247176524,
-        "failuresEnabled" : true
-      },
+      "debugSettings" : null,
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "d30ee520-d34c-11f1-a6d9-970576ca9a33"
+        "id" : "4d87bd40-d34d-11f1-a6d9-970576ca9a33"
       },
       "name" : "3. Lưu Đường Ngưỡng Vào Đồ Thị (LL/L/H/HH)",
       "queueName" : null,
@@ -131,91 +143,247 @@
       "type" : "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 1060,
-        "layoutY" : 150
+        "layoutX" : 1040,
+        "layoutY" : 220
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "if (msg.temperature == null) {\n    return [];\n}\nif (msg.alarmLevel != null) {\n    return ['Create'];\n} else {\n    return ['Clear'];\n}",
-        "tbelScript" : "if (msg.temperature == null) {\n    return [];\n}\nif (msg.alarmLevel != null) {\n    return ['Create'];\n} else {\n    return ['Clear'];\n}"
+        "jsScript" : "if (msg.temperature == null) {\n    return [];\n}\nif (msg.alarmCode == \"HH\") {\n    return ['Create_HH', 'Clear_H', 'Clear_L', 'Clear_LL'];\n} else if (msg.alarmCode == \"H\") {\n    return ['Create_H', 'Clear_HH', 'Clear_L', 'Clear_LL'];\n} else if (msg.alarmCode == \"LL\") {\n    return ['Create_LL', 'Clear_L', 'Clear_H', 'Clear_HH'];\n} else if (msg.alarmCode == \"L\") {\n    return ['Create_L', 'Clear_LL', 'Clear_H', 'Clear_HH'];\n} else {\n    return ['Clear_HH', 'Clear_H', 'Clear_L', 'Clear_LL'];\n}",
+        "tbelScript" : "if (msg.temperature == null) {\n    return [];\n}\nif (msg.alarmCode == \"HH\") {\n    return ['Create_HH', 'Clear_H', 'Clear_L', 'Clear_LL'];\n} else if (msg.alarmCode == \"H\") {\n    return ['Create_H', 'Clear_HH', 'Clear_L', 'Clear_LL'];\n} else if (msg.alarmCode == \"LL\") {\n    return ['Create_LL', 'Clear_L', 'Clear_H', 'Clear_HH'];\n} else if (msg.alarmCode == \"L\") {\n    return ['Create_L', 'Clear_LL', 'Clear_H', 'Clear_HH'];\n} else {\n    return ['Clear_HH', 'Clear_H', 'Clear_L', 'Clear_LL'];\n}"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1793247176524,
-        "failuresEnabled" : true
-      },
+      "debugSettings" : null,
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "d30f3340-d34c-11f1-a6d9-970576ca9a33"
+        "id" : "4d87bd41-d34d-11f1-a6d9-970576ca9a33"
       },
-      "name" : "4. Phân Nhánh Sự Cố (Create / Clear)",
+      "name" : "4. Phân Nhánh Sự Cố (HH / H / L / LL / OK)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.filter.TbJsSwitchNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 1350,
-        "layoutY" : 80
+        "layoutX" : 1360,
+        "layoutY" : 60
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.level = msg.alarmLevel;\ndetails.code = msg.alarmCode;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = \"Hiện tại: \" + msg.currentTemp + \"°C | Ngưỡng vi phạm: \" + msg.alarmLevel;\nreturn details;",
-        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.level = msg.alarmLevel;\ndetails.code = msg.alarmCode;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = \"Hiện tại: \" + msg.currentTemp + \"°C | Ngưỡng vi phạm: \" + msg.alarmLevel;\nreturn details;",
+        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
         "useMessageAlarmData" : false,
         "overwriteAlarmDetails" : true,
-        "alarmType" : "Nhiệt độ vượt ngưỡng (${alarmLevel})",
-        "severity" : "${alarmSeverity}",
+        "alarmType" : "Quá nóng khẩn cấp - CRITICAL - HH",
+        "severity" : "CRITICAL",
         "propagate" : true,
         "relationTypes" : [ "Contains" ],
         "propagateToOwner" : true,
         "propagateToTenant" : true,
-        "dynamicSeverity" : true
+        "dynamicSeverity" : false
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1793247176524,
-        "failuresEnabled" : true
-      },
+      "debugSettings" : null,
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "d30f8160-d34c-11f1-a6d9-970576ca9a33"
+        "id" : "4d87e450-d34d-11f1-a6d9-970576ca9a33"
       },
-      "name" : "5A. Tạo / Cập Nhật Sự Cố Vượt Ngưỡng",
+      "name" : "5A. Tạo Sự Cố HH (Quá Nóng Khẩn Cấp)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.action.TbCreateAlarmNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 1350,
-        "layoutY" : 240
+        "layoutX" : 1360,
+        "layoutY" : 160
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "alarmDetailsBuildJs" : "return {};",
-        "alarmDetailsBuildTbel" : "return {};",
-        "alarmType" : "Nhiệt độ vượt ngưỡng (${alarmLevel})"
+        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "useMessageAlarmData" : false,
+        "overwriteAlarmDetails" : true,
+        "alarmType" : "Cảnh báo nóng - WARNING - H",
+        "severity" : "WARNING",
+        "propagate" : true,
+        "relationTypes" : [ "Contains" ],
+        "propagateToOwner" : true,
+        "propagateToTenant" : true,
+        "dynamicSeverity" : false
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1793247176524,
-        "failuresEnabled" : true
-      },
+      "debugSettings" : null,
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "d30fcf80-d34c-11f1-a6d9-970576ca9a33"
+        "id" : "4d880b60-d34d-11f1-a6d9-970576ca9a33"
       },
-      "name" : "5B. Xóa Sự Cố Khi Nhiệt Độ An Toàn",
+      "name" : "5B. Tạo Sự Cố H (Cảnh Báo Nóng)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbCreateAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1360,
+        "layoutY" : 260
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "useMessageAlarmData" : false,
+        "overwriteAlarmDetails" : true,
+        "alarmType" : "Cảnh báo lạnh - WARNING - L",
+        "severity" : "WARNING",
+        "propagate" : true,
+        "relationTypes" : [ "Contains" ],
+        "propagateToOwner" : true,
+        "propagateToTenant" : true,
+        "dynamicSeverity" : false
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "4d880b61-d34d-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "5C. Tạo Sự Cố L (Cảnh Báo Lạnh)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbCreateAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1360,
+        "layoutY" : 360
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "useMessageAlarmData" : false,
+        "overwriteAlarmDetails" : true,
+        "alarmType" : "Quá lạnh khẩn cấp - CRITICAL - LL",
+        "severity" : "CRITICAL",
+        "propagate" : true,
+        "relationTypes" : [ "Contains" ],
+        "propagateToOwner" : true,
+        "propagateToTenant" : true,
+        "dynamicSeverity" : false
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "4d888090-d34d-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "5D. Tạo Sự Cố LL (Quá Lạnh Khẩn Cấp)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbCreateAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1680,
+        "layoutY" : 60
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmType" : "Quá nóng khẩn cấp - CRITICAL - HH"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "4d88a7a0-d34d-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "6A. Xóa Sự Cố HH",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbClearAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1680,
+        "layoutY" : 160
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmType" : "Cảnh báo nóng - WARNING - H"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "4d88f5c0-d34d-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "6B. Xóa Sự Cố H",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbClearAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1680,
+        "layoutY" : 260
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmType" : "Cảnh báo lạnh - WARNING - L"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "4d896af0-d34d-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "6C. Xóa Sự Cố L",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbClearAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1680,
+        "layoutY" : 360
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmDetailsBuildJs" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\nif (metadata.prevAlarmDetails != null) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\ndetails.code = msg.alarmCode;\ndetails.level = msg.alarmLevel;\ndetails.temperature = msg.currentTemp;\ndetails.threshold = msg.thresholdValue;\ndetails.LL = msg.alarm_LL;\ndetails.L = msg.alarm_L;\ndetails.H = msg.alarm_H;\ndetails.HH = msg.alarm_HH;\ndetails.note = msg.alarmNote;\nreturn details;",
+        "alarmType" : "Quá lạnh khẩn cấp - CRITICAL - LL"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "4d899200-d34d-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "6D. Xóa Sự Cố LL",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
