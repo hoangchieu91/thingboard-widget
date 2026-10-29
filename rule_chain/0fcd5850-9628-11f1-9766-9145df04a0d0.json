@@ -79,6 +79,10 @@
       "toIndex" : 2,
       "type" : "Success"
     }, {
+      "fromIndex" : 7,
+      "toIndex" : 22,
+      "type" : "Success"
+    }, {
       "fromIndex" : 9,
       "toIndex" : 12,
       "type" : "Success"
@@ -117,6 +121,14 @@
     }, {
       "fromIndex" : 21,
       "toIndex" : 0,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 22,
+      "toIndex" : 23,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 23,
+      "toIndex" : 24,
       "type" : "Success"
     } ],
     "firstNodeIndex" : 6,
@@ -753,6 +765,81 @@
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 820,
+        "layoutY" : 520
+      },
+      "configuration" : {
+        "tellFailureIfAbsent" : false,
+        "fetchTo" : "METADATA",
+        "clientAttributeNames" : [ ],
+        "sharedAttributeNames" : [ ],
+        "serverAttributeNames" : [ "baseline_kwh_day", "baseline_kwh_week", "baseline_kwh_month", "baseline_kwh_quarter", "baseline_kwh_year" ],
+        "latestTsKeyNames" : [ ],
+        "getLatestValueWithTs" : false
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "8951c2b0-d34f-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_Energy Period Baselines",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.metadata.TbGetAttributesNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1100,
+        "layoutY" : 520
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "jsScript" : "var raw = msg.kwh != null ? Double.parseDouble(msg.kwh.toString()) : (msg.kWh != null ? Double.parseDouble(msg.kWh.toString()) : null);\nif (raw == null || raw <= 0 || metadata.ss_baseline_kwh_day == null) {\n    return null;\n}\nvar bDay = Double.parseDouble(metadata.ss_baseline_kwh_day.toString());\nvar bWeek = metadata.ss_baseline_kwh_week != null ? Double.parseDouble(metadata.ss_baseline_kwh_week.toString()) : bDay;\nvar bMonth = metadata.ss_baseline_kwh_month != null ? Double.parseDouble(metadata.ss_baseline_kwh_month.toString()) : bWeek;\nvar bQuarter = metadata.ss_baseline_kwh_quarter != null ? Double.parseDouble(metadata.ss_baseline_kwh_quarter.toString()) : bMonth;\nvar bYear = metadata.ss_baseline_kwh_year != null ? Double.parseDouble(metadata.ss_baseline_kwh_year.toString()) : bQuarter;\n\nvar outMsg = {\n    \"kwh_today\": Math.max(0.0, Math.round((raw - bDay) * 10.0) / 10.0),\n    \"kwh_week\": Math.max(0.0, Math.round((raw - bWeek) * 10.0) / 10.0),\n    \"kwh_month\": Math.max(0.0, Math.round((raw - bMonth) * 10.0) / 10.0),\n    \"kwh_quarter\": Math.max(0.0, Math.round((raw - bQuarter) * 10.0) / 10.0),\n    \"kwh_year\": Math.max(0.0, Math.round((raw - bYear) * 10.0) / 10.0)\n};\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};",
+        "tbelScript" : "var raw = msg.kwh != null ? Double.parseDouble(msg.kwh.toString()) : (msg.kWh != null ? Double.parseDouble(msg.kWh.toString()) : null);\nif (raw == null || raw <= 0 || metadata.ss_baseline_kwh_day == null) {\n    return null;\n}\nvar bDay = Double.parseDouble(metadata.ss_baseline_kwh_day.toString());\nvar bWeek = metadata.ss_baseline_kwh_week != null ? Double.parseDouble(metadata.ss_baseline_kwh_week.toString()) : bDay;\nvar bMonth = metadata.ss_baseline_kwh_month != null ? Double.parseDouble(metadata.ss_baseline_kwh_month.toString()) : bWeek;\nvar bQuarter = metadata.ss_baseline_kwh_quarter != null ? Double.parseDouble(metadata.ss_baseline_kwh_quarter.toString()) : bMonth;\nvar bYear = metadata.ss_baseline_kwh_year != null ? Double.parseDouble(metadata.ss_baseline_kwh_year.toString()) : bQuarter;\n\nvar outMsg = {\n    \"kwh_today\": Math.max(0.0, Math.round((raw - bDay) * 10.0) / 10.0),\n    \"kwh_week\": Math.max(0.0, Math.round((raw - bWeek) * 10.0) / 10.0),\n    \"kwh_month\": Math.max(0.0, Math.round((raw - bMonth) * 10.0) / 10.0),\n    \"kwh_quarter\": Math.max(0.0, Math.round((raw - bQuarter) * 10.0) / 10.0),\n    \"kwh_year\": Math.max(0.0, Math.round((raw - bYear) * 10.0) / 10.0)\n};\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "8951e9c0-d34f-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_Compute Dynamic Energy Periods (Day/Week/Month/Quarter/Year)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1380,
+        "layoutY" : 520
+      },
+      "configuration" : {
+        "defaultTTL" : 0,
+        "useServerTs" : false,
+        "processingSettings" : {
+          "type" : "ON_EVERY_MESSAGE"
+        }
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "8951e9c1-d34f-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_Save Energy Period Deltas",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode"
     } ],
     "ruleChainConnections" : null
   },
@@ -781,7 +868,7 @@
     },
     "type" : "Uses",
     "typeGroup" : "COMMON",
-    "version" : 1917
+    "version" : 2016
   } ],
   "attributes" : {
     "SERVER_SCOPE" : [ ]
