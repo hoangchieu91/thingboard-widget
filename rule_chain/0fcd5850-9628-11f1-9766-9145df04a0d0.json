@@ -19,22 +19,6 @@
   },
   "metaData" : {
     "connections" : [ {
-      "fromIndex" : 0,
-      "toIndex" : 7,
-      "type" : "Success"
-    }, {
-      "fromIndex" : 0,
-      "toIndex" : 8,
-      "type" : "Success"
-    }, {
-      "fromIndex" : 0,
-      "toIndex" : 14,
-      "type" : "Success"
-    }, {
-      "fromIndex" : 2,
-      "toIndex" : 0,
-      "type" : "Post telemetry"
-    }, {
       "fromIndex" : 2,
       "toIndex" : 1,
       "type" : "Post attributes"
@@ -52,94 +36,75 @@
       "type" : "RPC Request to Device"
     }, {
       "fromIndex" : 2,
-      "toIndex" : 9,
-      "type" : "Post telemetry"
-    }, {
-      "fromIndex" : 2,
-      "toIndex" : 10,
-      "type" : "Post telemetry"
-    }, {
-      "fromIndex" : 2,
       "toIndex" : 11,
       "type" : "Post telemetry"
     }, {
       "fromIndex" : 2,
-      "toIndex" : 15,
-      "type" : "Attributes Updated"
-    }, {
-      "fromIndex" : 2,
-      "toIndex" : 15,
-      "type" : "Post attributes"
-    }, {
-      "fromIndex" : 2,
       "toIndex" : 17,
-      "type" : "Attributes Updated"
+      "type" : "Inactivity Event"
+    }, {
+      "fromIndex" : 2,
+      "toIndex" : 18,
+      "type" : "Activity Event"
     }, {
       "fromIndex" : 6,
       "toIndex" : 2,
       "type" : "Success"
     }, {
-      "fromIndex" : 7,
-      "toIndex" : 22,
+      "fromIndex" : 8,
+      "toIndex" : 9,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 9,
+      "toIndex" : 10,
       "type" : "Success"
     }, {
       "fromIndex" : 9,
       "toIndex" : 12,
       "type" : "Success"
     }, {
-      "fromIndex" : 10,
+      "fromIndex" : 11,
       "toIndex" : 0,
-      "type" : "Success"
+      "type" : "Valid_Telemetry"
+    }, {
+      "fromIndex" : 11,
+      "toIndex" : 7,
+      "type" : "Temp_Route"
+    }, {
+      "fromIndex" : 11,
+      "toIndex" : 8,
+      "type" : "Energy_Route"
     }, {
       "fromIndex" : 11,
       "toIndex" : 13,
-      "type" : "Success"
+      "type" : "Contactor_Route"
     }, {
-      "fromIndex" : 12,
-      "toIndex" : 0,
-      "type" : "Success"
+      "fromIndex" : 11,
+      "toIndex" : 16,
+      "type" : "Sensor_Spike_Fault"
     }, {
       "fromIndex" : 13,
-      "toIndex" : 0,
+      "toIndex" : 14,
       "type" : "Success"
     }, {
-      "fromIndex" : 15,
-      "toIndex" : 16,
-      "type" : "True"
-    }, {
-      "fromIndex" : 17,
-      "toIndex" : 18,
-      "type" : "True"
-    }, {
-      "fromIndex" : 18,
-      "toIndex" : 19,
+      "fromIndex" : 14,
+      "toIndex" : 12,
       "type" : "Success"
     }, {
-      "fromIndex" : 20,
-      "toIndex" : 21,
-      "type" : "Success"
-    }, {
-      "fromIndex" : 21,
-      "toIndex" : 0,
-      "type" : "Success"
-    }, {
-      "fromIndex" : 22,
-      "toIndex" : 23,
-      "type" : "Success"
-    }, {
-      "fromIndex" : 23,
-      "toIndex" : 24,
+      "fromIndex" : 14,
+      "toIndex" : 15,
       "type" : "Success"
     } ],
     "firstNodeIndex" : 6,
     "nodes" : [ {
       "additionalInfo" : {
-        "description" : null,
-        "layoutX" : 1043,
-        "layoutY" : 149
+        "description" : "WebSockets & Latest cập nhật tức thời; Lịch sử ts_kv lọc trùng 60s + tự động xóa dữ liệu thô quá 365 ngày",
+        "layoutX" : 880,
+        "layoutY" : 120
       },
       "configuration" : {
         "processingSettings" : {
+          "type" : "ADVANCED",
           "timeseries" : {
             "type" : "DEDUPLICATE",
             "deduplicationIntervalSecs" : 60
@@ -152,10 +117,9 @@
           },
           "calculatedFields" : {
             "type" : "ON_EVERY_MESSAGE"
-          },
-          "type" : "ADVANCED"
+          }
         },
-        "defaultTTL" : 0,
+        "defaultTTL" : 31536000,
         "useServerTs" : null
       },
       "configurationVersion" : 1,
@@ -166,15 +130,15 @@
         "entityType" : "RULE_NODE",
         "id" : "0fcff060-9628-11f1-9766-9145df04a0d0"
       },
-      "name" : "Save Timeseries",
+      "name" : "Save Timeseries (DEDUPLICATE 60s • TTL 365d)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 575,
-        "layoutY" : 16
+        "layoutX" : 540,
+        "layoutY" : 30
       },
       "configuration" : {
         "scope" : "CLIENT_SCOPE",
@@ -200,8 +164,8 @@
       "type" : "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 258,
-        "layoutY" : 251
+        "layoutX" : 260,
+        "layoutY" : 240
       },
       "configuration" : {
         "version" : 0
@@ -221,13 +185,13 @@
       "type" : "org.thingsboard.rule.engine.filter.TbMsgTypeSwitchNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 578,
-        "layoutY" : 395
+        "layoutX" : 540,
+        "layoutY" : 440
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
-        "tbelScript" : "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        "jsScript" : "return '\\nIncoming RPC:\\n' + JSON.stringify(msg);",
+        "tbelScript" : "return '\\nIncoming RPC:\\n' + JSON.stringify(msg);"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -244,13 +208,13 @@
       "type" : "org.thingsboard.rule.engine.action.TbLogNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 575,
-        "layoutY" : 456
+        "layoutX" : 540,
+        "layoutY" : 510
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);",
-        "tbelScript" : "return '\\nIncoming message:\\n' + JSON.stringify(msg) + '\\nIncoming metadata:\\n' + JSON.stringify(metadata);"
+        "jsScript" : "return '\\nOther msg:\\n' + JSON.stringify(msg);",
+        "tbelScript" : "return '\\nOther msg:\\n' + JSON.stringify(msg);"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -267,8 +231,8 @@
       "type" : "org.thingsboard.rule.engine.action.TbLogNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 545,
-        "layoutY" : 525
+        "layoutX" : 540,
+        "layoutY" : 580
       },
       "configuration" : {
         "timeoutInSeconds" : 60
@@ -288,9 +252,9 @@
       "type" : "org.thingsboard.rule.engine.rpc.TbSendRPCRequestNode"
     }, {
       "additionalInfo" : {
-        "description" : "Process incoming messages from devices with the alarm rules defined in the device profile. Dispatch all incoming messages with \"Success\" relation type.",
-        "layoutX" : 22,
-        "layoutY" : 252
+        "description" : "Entry Point",
+        "layoutX" : 40,
+        "layoutY" : 240
       },
       "configuration" : {
         "persistAlarmRulesState" : false,
@@ -311,33 +275,8 @@
       "type" : "org.thingsboard.rule.engine.profile.TbDeviceProfileNode"
     }, {
       "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 1090,
-        "layoutY" : 369
-      },
-      "configuration" : {
-        "scriptLang" : "TBEL",
-        "jsScript" : "if (msg.kwh != null && msg.kWh == null) {\n    msg.kWh = msg.kwh;\n}\nif (msg.kWh > 0 || msg.kwh > 0) {\n    metadata.key = msg.kWh != null ? \"kWh\" : \"kwh\";\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}\nif (msg.m3Air > 0) {\n    metadata.key = \"m3Air\";\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}",
-        "tbelScript" : "if (msg.kwh != null && msg.kWh == null) {\n    msg.kWh = msg.kwh;\n}\nif (msg.kWh > 0 || msg.kwh > 0) {\n    metadata.key = msg.kWh != null ? \"kWh\" : \"kwh\";\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}\nif (msg.m3Air > 0) {\n    metadata.key = \"m3Air\";\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}"
-      },
-      "configurationVersion" : 0,
-      "createdTime" : 0,
-      "debugSettings" : null,
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd06590-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "AI_Check kWh, m3 (Ami Onsen)",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 1191,
-        "layoutY" : 594
+        "layoutX" : 880,
+        "layoutY" : 230
       },
       "configuration" : {
         "forwardMsgToDefaultRuleChain" : false,
@@ -351,431 +290,22 @@
         "entityType" : "RULE_NODE",
         "id" : "0fd06591-9628-11f1-9766-9145df04a0d0"
       },
-      "name" : "AI_Ami-Onsen 4-Threshold Temp Alarms Route",
+      "name" : "AI_02 Chuyển Chuỗi Cảnh Báo 4 Ngưỡng Nhiệt PT100",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.flow.TbRuleChainInputNode"
     }, {
       "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 592,
-        "layoutY" : 81
-      },
-      "configuration" : {
-        "inputValueKey" : "kWh",
-        "outputValueKey" : "delta_kWh",
-        "useCache" : true,
-        "addPeriodBetweenMsgs" : false,
-        "periodValueKey" : "periodInMs",
-        "round" : 3,
-        "tellFailureIfDeltaIsNegative" : true,
-        "excludeZeroDeltas" : true
-      },
-      "configurationVersion" : 1,
-      "createdTime" : 0,
-      "debugSettings" : null,
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd06592-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "delta_kWh",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.metadata.CalculateDeltaNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 593,
-        "layoutY" : 141
-      },
-      "configuration" : {
-        "inputValueKey" : "m3Air",
-        "outputValueKey" : "delta_m3Air",
-        "useCache" : true,
-        "addPeriodBetweenMsgs" : false,
-        "periodValueKey" : "periodInMs",
-        "round" : 3,
-        "tellFailureIfDeltaIsNegative" : true,
-        "excludeZeroDeltas" : true
-      },
-      "configurationVersion" : 1,
-      "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 0,
-        "failuresEnabled" : false
-      },
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd08ca0-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "delta_m3Air",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.metadata.CalculateDeltaNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 566,
-        "layoutY" : 270
-      },
-      "configuration" : {
-        "inputValueKey" : "m3LPG",
-        "outputValueKey" : "delta_m3LPG",
-        "useCache" : true,
-        "addPeriodBetweenMsgs" : false,
-        "periodValueKey" : "periodInMs",
-        "round" : 3,
-        "tellFailureIfDeltaIsNegative" : true,
-        "excludeZeroDeltas" : true
-      },
-      "configurationVersion" : 1,
-      "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 0,
-        "failuresEnabled" : false
-      },
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd08ca1-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "delta m3LPG",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.metadata.CalculateDeltaNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 820,
-        "layoutY" : 85
-      },
-      "configuration" : {
-        "operation" : "CUSTOM",
-        "arguments" : [ {
-          "type" : "MESSAGE_BODY",
-          "key" : "delta_kWh",
-          "name" : "x",
-          "defaultValue" : 0
-        } ],
-        "customFunction" : "x*0.835/1000",
-        "result" : {
-          "type" : "MESSAGE_BODY",
-          "key" : "delta_CO2",
-          "resultValuePrecision" : 6,
-          "addToBody" : false,
-          "addToMetadata" : false
-        }
-      },
-      "configurationVersion" : 0,
-      "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1740710390119,
-        "failuresEnabled" : false
-      },
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd0b3b0-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "Tính CO2",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.math.TbMathNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 781,
-        "layoutY" : 270
-      },
-      "configuration" : {
-        "operation" : "CUSTOM",
-        "arguments" : [ {
-          "type" : "MESSAGE_BODY",
-          "key" : "delta_m3LPG",
-          "name" : "x",
-          "defaultValue" : 0
-        } ],
-        "customFunction" : "x*1.65",
-        "result" : {
-          "type" : "MESSAGE_BODY",
-          "key" : "delta_CO2",
-          "resultValuePrecision" : 3,
-          "addToBody" : false,
-          "addToMetadata" : false
-        }
-      },
-      "configurationVersion" : 0,
-      "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1740710390119,
-        "failuresEnabled" : false
-      },
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd0dac0-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "Tính CO2",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.math.TbMathNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 1169,
-        "layoutY" : 278
-      },
-      "configuration" : {
-        "scriptLang" : "TBEL",
-        "jsScript" : "return {msg: msg, metadata: metadata, msgType: msgType};",
-        "tbelScript" : "if(msg.m3LPG>0){\n    metadata.key = \"m3LPG\";\n    return {msg: msg, metadata: metadata, msgType: msgType};\n}"
-      },
-      "configurationVersion" : 0,
-      "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 0,
-        "failuresEnabled" : false
-      },
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd0dac1-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "Check LPG",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 459,
-        "layoutY" : 597
-      },
-      "configuration" : {
-        "scriptLang" : "TBEL",
-        "jsScript" : "return msg.temperature > 20;",
-        "tbelScript" : "return msg.capcha !=null;"
-      },
-      "configurationVersion" : 0,
-      "createdTime" : 0,
-      "debugSettings" : null,
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd101d0-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "check capcha",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.filter.TbJsFilterNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 755,
-        "layoutY" : 599
-      },
-      "configuration" : {
-        "direction" : "FROM",
-        "entityType" : "DEVICE",
-        "entityNamePattern" : "$[capcha]",
-        "entityTypePattern" : "Remote_type",
-        "relationType" : "Contains",
-        "createEntityIfNotExists" : true,
-        "removeCurrentRelations" : false,
-        "changeOriginatorToRelatedEntity" : false
-      },
-      "configurationVersion" : 1,
-      "createdTime" : 0,
-      "debugSettings" : null,
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd101d1-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "thêm capcha",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.action.TbCreateRelationNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 394,
-        "layoutY" : 694
-      },
-      "configuration" : {
-        "scriptLang" : "TBEL",
-        "jsScript" : "return msg.temperature > 20;",
-        "tbelScript" : "return msg.timers != null;"
-      },
-      "configurationVersion" : 0,
-      "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 0,
-        "failuresEnabled" : false
-      },
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd101d2-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "check times",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.filter.TbJsFilterNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 637,
-        "layoutY" : 695
-      },
-      "configuration" : {
-        "dataMapping" : {
-          "name" : "Name"
-        },
-        "ignoreNullStrings" : false,
-        "fetchTo" : "DATA"
-      },
-      "configurationVersion" : 1,
-      "createdTime" : 0,
-      "debugSettings" : null,
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd128e0-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "get Name",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.metadata.TbGetOriginatorFieldsNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 871,
-        "layoutY" : 701
-      },
-      "configuration" : {
-        "restEndpointUrlPattern" : "http://localhost:1880/api/remote",
-        "requestMethod" : "POST",
-        "useSimpleClientHttpFactory" : false,
-        "parseToPlainText" : false,
-        "ignoreRequestBody" : false,
-        "enableProxy" : false,
-        "useSystemProxyProperties" : false,
-        "proxyScheme" : null,
-        "proxyHost" : null,
-        "proxyPort" : 0,
-        "proxyUser" : null,
-        "proxyPassword" : null,
-        "readTimeoutMs" : 0,
-        "maxParallelRequestsCount" : 0,
-        "headers" : {
-          "Content-Type" : "application/json"
-        },
-        "credentials" : {
-          "type" : "anonymous"
-        },
-        "maxInMemoryBufferSizeInKb" : 256
-      },
-      "configurationVersion" : 3,
-      "createdTime" : 0,
-      "debugSettings" : null,
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd128e1-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "send api",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.rest.TbRestApiCallNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 686,
-        "layoutY" : 321
-      },
-      "configuration" : {
-        "interval" : 60,
-        "strategy" : "LAST",
-        "maxPendingMsgs" : 300,
-        "maxRetries" : 5
-      },
-      "configurationVersion" : 1,
-      "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1764920941546,
-        "failuresEnabled" : false
-      },
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd14ff0-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "save",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.deduplication.TbMsgDeduplicationNode"
-    }, {
-      "additionalInfo" : {
-        "description" : "",
-        "layoutX" : 860,
-        "layoutY" : 436
-      },
-      "configuration" : {
-        "scriptLang" : "TBEL",
-        "jsScript" : "return {msg: msg, metadata: metadata, msgType: msgType};",
-        "tbelScript" : "return {msg: msg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};"
-      },
-      "configurationVersion" : 0,
-      "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1764923077954,
-        "failuresEnabled" : false
-      },
-      "externalId" : null,
-      "id" : {
-        "entityType" : "RULE_NODE",
-        "id" : "0fd14ff1-9628-11f1-9766-9145df04a0d0"
-      },
-      "name" : "save log",
-      "queueName" : null,
-      "ruleChainId" : null,
-      "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
-    }, {
-      "additionalInfo" : {
-        "layoutX" : 820,
-        "layoutY" : 520
+        "layoutX" : 880,
+        "layoutY" : 330
       },
       "configuration" : {
         "tellFailureIfAbsent" : false,
         "fetchTo" : "METADATA",
         "clientAttributeNames" : [ ],
         "sharedAttributeNames" : [ ],
-        "serverAttributeNames" : [ "baseline_kwh_day", "baseline_kwh_week", "baseline_kwh_month", "baseline_kwh_quarter", "baseline_kwh_year" ],
+        "serverAttributeNames" : [ "last_raw_kwh", "baseline_kwh_day", "baseline_kwh_week", "baseline_kwh_month", "baseline_kwh_quarter", "baseline_kwh_year", "rated_kw" ],
         "latestTsKeyNames" : [ ],
         "getLatestValueWithTs" : false
       },
@@ -787,20 +317,20 @@
         "entityType" : "RULE_NODE",
         "id" : "8951c2b0-d34f-11f1-a6d9-970576ca9a33"
       },
-      "name" : "AI_Energy Period Baselines",
+      "name" : "AI_03A Đọc Mốc Đầu Kỳ & Biểu Giá TOU EVN",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.metadata.TbGetAttributesNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 1100,
-        "layoutY" : 520
+        "layoutX" : 1160,
+        "layoutY" : 330
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "var raw = msg.kwh != null ? Double.parseDouble(msg.kwh.toString()) : (msg.kWh != null ? Double.parseDouble(msg.kWh.toString()) : null);\nif (raw == null || raw <= 0 || metadata.ss_baseline_kwh_day == null) {\n    return null;\n}\nvar bDay = Double.parseDouble(metadata.ss_baseline_kwh_day.toString());\nvar bWeek = metadata.ss_baseline_kwh_week != null ? Double.parseDouble(metadata.ss_baseline_kwh_week.toString()) : bDay;\nvar bMonth = metadata.ss_baseline_kwh_month != null ? Double.parseDouble(metadata.ss_baseline_kwh_month.toString()) : bWeek;\nvar bQuarter = metadata.ss_baseline_kwh_quarter != null ? Double.parseDouble(metadata.ss_baseline_kwh_quarter.toString()) : bMonth;\nvar bYear = metadata.ss_baseline_kwh_year != null ? Double.parseDouble(metadata.ss_baseline_kwh_year.toString()) : bQuarter;\n\nvar outMsg = {\n    \"kwh_today\": Math.max(0.0, Math.round((raw - bDay) * 10.0) / 10.0),\n    \"kwh_week\": Math.max(0.0, Math.round((raw - bWeek) * 10.0) / 10.0),\n    \"kwh_month\": Math.max(0.0, Math.round((raw - bMonth) * 10.0) / 10.0),\n    \"kwh_quarter\": Math.max(0.0, Math.round((raw - bQuarter) * 10.0) / 10.0),\n    \"kwh_year\": Math.max(0.0, Math.round((raw - bYear) * 10.0) / 10.0)\n};\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};",
-        "tbelScript" : "var raw = msg.kwh != null ? Double.parseDouble(msg.kwh.toString()) : (msg.kWh != null ? Double.parseDouble(msg.kWh.toString()) : null);\nif (raw == null || raw <= 0 || metadata.ss_baseline_kwh_day == null) {\n    return null;\n}\nvar bDay = Double.parseDouble(metadata.ss_baseline_kwh_day.toString());\nvar bWeek = metadata.ss_baseline_kwh_week != null ? Double.parseDouble(metadata.ss_baseline_kwh_week.toString()) : bDay;\nvar bMonth = metadata.ss_baseline_kwh_month != null ? Double.parseDouble(metadata.ss_baseline_kwh_month.toString()) : bWeek;\nvar bQuarter = metadata.ss_baseline_kwh_quarter != null ? Double.parseDouble(metadata.ss_baseline_kwh_quarter.toString()) : bMonth;\nvar bYear = metadata.ss_baseline_kwh_year != null ? Double.parseDouble(metadata.ss_baseline_kwh_year.toString()) : bQuarter;\n\nvar outMsg = {\n    \"kwh_today\": Math.max(0.0, Math.round((raw - bDay) * 10.0) / 10.0),\n    \"kwh_week\": Math.max(0.0, Math.round((raw - bWeek) * 10.0) / 10.0),\n    \"kwh_month\": Math.max(0.0, Math.round((raw - bMonth) * 10.0) / 10.0),\n    \"kwh_quarter\": Math.max(0.0, Math.round((raw - bQuarter) * 10.0) / 10.0),\n    \"kwh_year\": Math.max(0.0, Math.round((raw - bYear) * 10.0) / 10.0)\n};\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};"
+        "jsScript" : "var raw = msg.kwh != null ? Double.parseDouble(msg.kwh.toString()) : (msg.kWh != null ? Double.parseDouble(msg.kWh.toString()) : null);\nif (raw == null || raw <= 0 || metadata.ss_baseline_kwh_day == null) {\n    return null;\n}\n\nvar bDay = Double.parseDouble(metadata.ss_baseline_kwh_day.toString());\nvar bWeek = metadata.ss_baseline_kwh_week != null ? Double.parseDouble(metadata.ss_baseline_kwh_week.toString()) : bDay;\nvar bMonth = metadata.ss_baseline_kwh_month != null ? Double.parseDouble(metadata.ss_baseline_kwh_month.toString()) : bWeek;\nvar bQuarter = metadata.ss_baseline_kwh_quarter != null ? Double.parseDouble(metadata.ss_baseline_kwh_quarter.toString()) : bMonth;\nvar bYear = metadata.ss_baseline_kwh_year != null ? Double.parseDouble(metadata.ss_baseline_kwh_year.toString()) : bQuarter;\n\nvar lastRaw = metadata.ss_last_raw_kwh != null ? Double.parseDouble(metadata.ss_last_raw_kwh.toString()) : raw;\nvar dKwh = raw - lastRaw;\n// Anti-negative & meter replacement protection\nif (dKwh < 0.0 || dKwh > 500.0) {\n    dKwh = 0.0;\n}\ndKwh = Math.round(dKwh * 1000.0) / 1000.0;\n\n// Determine EVN 3-Tier TOU slot in Vietnam Timezone (UTC+7)\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : 1793250000000L;\nvar vnMs = tsMs + 25200000L;\nvar minOfDay = (vnMs / 60000L) % 1440L;\nvar dayOfWeek = ((vnMs / 86400000L) + 4L) % 7L; // 0 = Sunday, 1..6 = Mon..Sat\n\nvar tier = \"normal\";\nif (minOfDay >= 1320 || minOfDay < 240) {\n    tier = \"offpeak\";\n} else if (dayOfWeek != 0 && ((minOfDay >= 570 && minOfDay < 690) || (minOfDay >= 1020 && minOfDay < 1200))) {\n    tier = \"peak\";\n}\n\nvar dNorm = tier == \"normal\" ? dKwh : 0.0;\nvar dPeak = tier == \"peak\" ? dKwh : 0.0;\nvar dOff = tier == \"offpeak\" ? dKwh : 0.0;\n\nvar kwhToday = Math.max(0.0, Math.round((raw - bDay) * 10.0) / 10.0);\nvar kwhWeek = Math.max(0.0, Math.round((raw - bWeek) * 10.0) / 10.0);\nvar kwhMonth = Math.max(0.0, Math.round((raw - bMonth) * 10.0) / 10.0);\nvar kwhQuarter = Math.max(0.0, Math.round((raw - bQuarter) * 10.0) / 10.0);\nvar kwhYear = Math.max(0.0, Math.round((raw - bYear) * 10.0) / 10.0);\n\nvar outMsg = {\n    \"last_raw_kwh\": raw,\n    \"evn_tou_tier\": tier,\n    \"kwh_today\": kwhToday,\n    \"kwh_week\": kwhWeek,\n    \"kwh_month\": kwhMonth,\n    \"kwh_quarter\": kwhQuarter,\n    \"kwh_year\": kwhYear\n};\n\nif (dKwh > 0.0) {\n    outMsg.delta_kwh = dKwh;\n    outMsg.delta_kwh_normal = dNorm;\n    outMsg.delta_kwh_peak = dPeak;\n    outMsg.delta_kwh_offpeak = dOff;\n}\n\n// Peak hour overload check\nvar pTot = msg.p_total != null ? Double.parseDouble(msg.p_total.toString()) : 0.0;\nvar ratedKw = metadata.ss_rated_kw != null ? Double.parseDouble(metadata.ss_rated_kw.toString()) : 100.0;\nif (tier == \"peak\" && pTot > ratedKw * 0.95) {\n    outMsg.peak_overload_warning = true;\n} else {\n    outMsg.peak_overload_warning = false;\n}\n\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};",
+        "tbelScript" : "var raw = msg.kwh != null ? Double.parseDouble(msg.kwh.toString()) : (msg.kWh != null ? Double.parseDouble(msg.kWh.toString()) : null);\nif (raw == null || raw <= 0 || metadata.ss_baseline_kwh_day == null) {\n    return null;\n}\n\nvar bDay = Double.parseDouble(metadata.ss_baseline_kwh_day.toString());\nvar bWeek = metadata.ss_baseline_kwh_week != null ? Double.parseDouble(metadata.ss_baseline_kwh_week.toString()) : bDay;\nvar bMonth = metadata.ss_baseline_kwh_month != null ? Double.parseDouble(metadata.ss_baseline_kwh_month.toString()) : bWeek;\nvar bQuarter = metadata.ss_baseline_kwh_quarter != null ? Double.parseDouble(metadata.ss_baseline_kwh_quarter.toString()) : bMonth;\nvar bYear = metadata.ss_baseline_kwh_year != null ? Double.parseDouble(metadata.ss_baseline_kwh_year.toString()) : bQuarter;\n\nvar lastRaw = metadata.ss_last_raw_kwh != null ? Double.parseDouble(metadata.ss_last_raw_kwh.toString()) : raw;\nvar dKwh = raw - lastRaw;\n// Anti-negative & meter replacement protection\nif (dKwh < 0.0 || dKwh > 500.0) {\n    dKwh = 0.0;\n}\ndKwh = Math.round(dKwh * 1000.0) / 1000.0;\n\n// Determine EVN 3-Tier TOU slot in Vietnam Timezone (UTC+7)\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : 1793250000000L;\nvar vnMs = tsMs + 25200000L;\nvar minOfDay = (vnMs / 60000L) % 1440L;\nvar dayOfWeek = ((vnMs / 86400000L) + 4L) % 7L; // 0 = Sunday, 1..6 = Mon..Sat\n\nvar tier = \"normal\";\nif (minOfDay >= 1320 || minOfDay < 240) {\n    tier = \"offpeak\";\n} else if (dayOfWeek != 0 && ((minOfDay >= 570 && minOfDay < 690) || (minOfDay >= 1020 && minOfDay < 1200))) {\n    tier = \"peak\";\n}\n\nvar dNorm = tier == \"normal\" ? dKwh : 0.0;\nvar dPeak = tier == \"peak\" ? dKwh : 0.0;\nvar dOff = tier == \"offpeak\" ? dKwh : 0.0;\n\nvar kwhToday = Math.max(0.0, Math.round((raw - bDay) * 10.0) / 10.0);\nvar kwhWeek = Math.max(0.0, Math.round((raw - bWeek) * 10.0) / 10.0);\nvar kwhMonth = Math.max(0.0, Math.round((raw - bMonth) * 10.0) / 10.0);\nvar kwhQuarter = Math.max(0.0, Math.round((raw - bQuarter) * 10.0) / 10.0);\nvar kwhYear = Math.max(0.0, Math.round((raw - bYear) * 10.0) / 10.0);\n\nvar outMsg = {\n    \"last_raw_kwh\": raw,\n    \"evn_tou_tier\": tier,\n    \"kwh_today\": kwhToday,\n    \"kwh_week\": kwhWeek,\n    \"kwh_month\": kwhMonth,\n    \"kwh_quarter\": kwhQuarter,\n    \"kwh_year\": kwhYear\n};\n\nif (dKwh > 0.0) {\n    outMsg.delta_kwh = dKwh;\n    outMsg.delta_kwh_normal = dNorm;\n    outMsg.delta_kwh_peak = dPeak;\n    outMsg.delta_kwh_offpeak = dOff;\n}\n\n// Peak hour overload check\nvar pTot = msg.p_total != null ? Double.parseDouble(msg.p_total.toString()) : 0.0;\nvar ratedKw = metadata.ss_rated_kw != null ? Double.parseDouble(metadata.ss_rated_kw.toString()) : 100.0;\nif (tier == \"peak\" && pTot > ratedKw * 0.95) {\n    outMsg.peak_overload_warning = true;\n} else {\n    outMsg.peak_overload_warning = false;\n}\n\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -810,21 +340,34 @@
         "entityType" : "RULE_NODE",
         "id" : "8951e9c0-d34f-11f1-a6d9-970576ca9a33"
       },
-      "name" : "AI_Compute Dynamic Energy Periods (Day/Week/Month/Quarter/Year)",
+      "name" : "AI_03B Bóc Tách 3 Khung Giờ TOU EVN & Lũy Kế Kỳ Động",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
     }, {
       "additionalInfo" : {
-        "layoutX" : 1380,
-        "layoutY" : 520
+        "layoutX" : 1450,
+        "layoutY" : 300
       },
       "configuration" : {
-        "defaultTTL" : 0,
+        "defaultTTL" : 31536000,
         "useServerTs" : false,
         "processingSettings" : {
-          "type" : "ON_EVERY_MESSAGE"
+          "type" : "ADVANCED",
+          "timeseries" : {
+            "type" : "DEDUPLICATE",
+            "deduplicationIntervalSecs" : 300
+          },
+          "latest" : {
+            "type" : "ON_EVERY_MESSAGE"
+          },
+          "webSockets" : {
+            "type" : "ON_EVERY_MESSAGE"
+          },
+          "calculatedFields" : {
+            "type" : "ON_EVERY_MESSAGE"
+          }
         }
       },
       "configurationVersion" : 1,
@@ -835,11 +378,238 @@
         "entityType" : "RULE_NODE",
         "id" : "8951e9c1-d34f-11f1-a6d9-970576ca9a33"
       },
-      "name" : "AI_Save Energy Period Deltas",
+      "name" : "AI_03C Lưu Sản Lượng Kỳ & TOU (DEDUPLICATE 300s)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode"
+    }, {
+      "additionalInfo" : {
+        "description" : "Chặn nhiễu đứt dây PT100 (<-45°C hoặc >160°C) không cho ghi rác vào DB và phân luồng Nhiệt / Điện / Contactor",
+        "layoutX" : 540,
+        "layoutY" : 160
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "jsScript" : "// 1. Clean foreign keys if any\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\n\nvar routes = [\"Valid_Telemetry\"];\n\n// 2. PT100 Temperature Spike & Open/Short Circuit Hardware Guard\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        // Block corrupted hardware spike (-200C or +850C) from polluting ts_kv database!\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 3. Power Meter Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 4. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;",
+        "tbelScript" : "// 1. Clean foreign keys if any\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\n\nvar routes = [\"Valid_Telemetry\"];\n\n// 2. PT100 Temperature Spike & Open/Short Circuit Hardware Guard\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        // Block corrupted hardware spike (-200C or +850C) from polluting ts_kv database!\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 3. Power Meter Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 4. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "541695c0-d404-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_01 Bộ Lọc Chống Nhiễu & Phân Luồng Thông Minh",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.filter.TbJsSwitchNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1450,
+        "layoutY" : 370
+      },
+      "configuration" : {
+        "scope" : "SERVER_SCOPE",
+        "notifyDevice" : false,
+        "processingSettings" : {
+          "type" : "ON_EVERY_MESSAGE"
+        },
+        "sendAttributesUpdatedNotification" : false,
+        "updateAttributesOnlyOnValueChange" : true
+      },
+      "configurationVersion" : 3,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "5416bcd0-d404-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_03D Lưu Trạng Thái Đồng Hồ Vào SERVER_SCOPE (0-Bloat)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.telemetry.TbMsgAttributesNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 880,
+        "layoutY" : 440
+      },
+      "configuration" : {
+        "tellFailureIfAbsent" : false,
+        "fetchTo" : "METADATA",
+        "clientAttributeNames" : [ ],
+        "sharedAttributeNames" : [ ],
+        "serverAttributeNames" : [ "last_run_ts", "runtime_hours_total", "continuous_run_hours", "maintenance_limit_hours" ],
+        "latestTsKeyNames" : [ ],
+        "getLatestValueWithTs" : false
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "5416bcd1-d404-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_04A Đọc Giờ Vận Hành Tích Lũy Contactor",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.metadata.TbGetAttributesNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1160,
+        "layoutY" : 440
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "jsScript" : "var statusStr = msg.status != null ? msg.status.toString().toUpperCase() : \"\";\nvar isRun = (statusStr == \"RUNNING\" || statusStr == \"ON\" || statusStr == \"1\" || msg.run == 1 || msg.run == true);\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : 1793250000000L;\nvar lastTs = metadata.ss_last_run_ts != null ? Long.parseLong(metadata.ss_last_run_ts.toString()) : tsMs;\nvar totalHrs = metadata.ss_runtime_hours_total != null ? Double.parseDouble(metadata.ss_runtime_hours_total.toString()) : 200.0;\nvar contHrs = metadata.ss_continuous_run_hours != null ? Double.parseDouble(metadata.ss_continuous_run_hours.toString()) : 0.0;\nvar maintLimit = metadata.ss_maintenance_limit_hours != null ? Double.parseDouble(metadata.ss_maintenance_limit_hours.toString()) : 1000.0;\n\nvar dtHrs = (tsMs - lastTs) / 3600000.0;\nif (dtHrs < 0.0 || dtHrs > 0.5) {\n    dtHrs = 0.0;\n}\n\nif (isRun) {\n    totalHrs = Math.round((totalHrs + dtHrs) * 100.0) / 100.0;\n    contHrs = Math.round((contHrs + dtHrs) * 100.0) / 100.0;\n} else {\n    contHrs = 0.0;\n}\n\nvar outMsg = {\n    \"last_run_ts\": tsMs,\n    \"runtime_hours_total\": totalHrs,\n    \"continuous_run_hours\": contHrs,\n    \"maintenance_due\": (totalHrs >= maintLimit)\n};\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};",
+        "tbelScript" : "var statusStr = msg.status != null ? msg.status.toString().toUpperCase() : \"\";\nvar isRun = (statusStr == \"RUNNING\" || statusStr == \"ON\" || statusStr == \"1\" || msg.run == 1 || msg.run == true);\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : 1793250000000L;\nvar lastTs = metadata.ss_last_run_ts != null ? Long.parseLong(metadata.ss_last_run_ts.toString()) : tsMs;\nvar totalHrs = metadata.ss_runtime_hours_total != null ? Double.parseDouble(metadata.ss_runtime_hours_total.toString()) : 200.0;\nvar contHrs = metadata.ss_continuous_run_hours != null ? Double.parseDouble(metadata.ss_continuous_run_hours.toString()) : 0.0;\nvar maintLimit = metadata.ss_maintenance_limit_hours != null ? Double.parseDouble(metadata.ss_maintenance_limit_hours.toString()) : 1000.0;\n\nvar dtHrs = (tsMs - lastTs) / 3600000.0;\nif (dtHrs < 0.0 || dtHrs > 0.5) {\n    dtHrs = 0.0;\n}\n\nif (isRun) {\n    totalHrs = Math.round((totalHrs + dtHrs) * 100.0) / 100.0;\n    contHrs = Math.round((contHrs + dtHrs) * 100.0) / 100.0;\n} else {\n    contHrs = 0.0;\n}\n\nvar outMsg = {\n    \"last_run_ts\": tsMs,\n    \"runtime_hours_total\": totalHrs,\n    \"continuous_run_hours\": contHrs,\n    \"maintenance_due\": (totalHrs >= maintLimit)\n};\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "5416e3e0-d404-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_04B Đếm Giờ Vận Hành Thực Tế & Kiểm Tra Bảo Trì",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 1450,
+        "layoutY" : 440
+      },
+      "configuration" : {
+        "defaultTTL" : 31536000,
+        "useServerTs" : false,
+        "processingSettings" : {
+          "type" : "ADVANCED",
+          "timeseries" : {
+            "type" : "DEDUPLICATE",
+            "deduplicationIntervalSecs" : 900
+          },
+          "latest" : {
+            "type" : "ON_EVERY_MESSAGE"
+          },
+          "webSockets" : {
+            "type" : "ON_EVERY_MESSAGE"
+          },
+          "calculatedFields" : {
+            "type" : "ON_EVERY_MESSAGE"
+          }
+        }
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "54170af0-d404-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_04C Lưu Giờ Máy Chạy (DEDUPLICATE 900s)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 880,
+        "layoutY" : 30
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmType" : "Lỗi phần cứng cảm biến PT100 (Đứt dây / Chập mạch)",
+        "alarmDetailsBuildJs" : "var details = {};\ndetails.code = 'SENSOR_FAULT';\ndetails.temperature = msg.temperature;\ndetails.note = 'Giá trị vượt giới hạn vật lý (-45..160°C), đã chặn không ghi vào DB';\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\ndetails.code = 'SENSOR_FAULT';\ndetails.temperature = msg.temperature;\ndetails.note = 'Giá trị vượt giới hạn vật lý (-45..160°C), đã chặn không ghi vào DB';\nreturn details;",
+        "severity" : "CRITICAL",
+        "propagate" : true,
+        "propagateToOwner" : false,
+        "propagateToTenant" : false,
+        "useMessageAlarmData" : false,
+        "overwriteAlarmDetails" : true,
+        "dynamicSeverity" : false,
+        "relationTypes" : [ "Contains" ]
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "54173200-d404-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_05A Cảnh Báo Đứt/Chập Dây Cảm Biến PT100",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbCreateAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 540,
+        "layoutY" : 300
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmType" : "Mất kết nối thiết bị (Modbus / Gateway Offline)",
+        "alarmDetailsBuildJs" : "var details = {};\ndetails.code = 'OFFLINE';\ndetails.note = 'Thiết bị không gửi dữ liệu quá thời gian quy định';\nreturn details;",
+        "alarmDetailsBuildTbel" : "var details = {};\ndetails.code = 'OFFLINE';\ndetails.note = 'Thiết bị không gửi dữ liệu quá thời gian quy định';\nreturn details;",
+        "severity" : "WARNING",
+        "propagate" : true,
+        "propagateToOwner" : false,
+        "propagateToTenant" : false,
+        "useMessageAlarmData" : false,
+        "overwriteAlarmDetails" : true,
+        "dynamicSeverity" : false,
+        "relationTypes" : [ "Contains" ]
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "54175910-d404-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_05B Cảnh Báo Mất Kết Nối Thiết Bị (Watchdog Offline)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbCreateAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 540,
+        "layoutY" : 370
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "alarmType" : "Mất kết nối thiết bị (Modbus / Gateway Offline)",
+        "alarmDetailsBuildJs" : "return {};",
+        "alarmDetailsBuildTbel" : "return {};"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "54175911-d404-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_05C Tự Động Xóa Cảnh Báo Offline Khi Có Tín Hiệu",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.action.TbClearAlarmNode"
     } ],
     "ruleChainConnections" : null
   },
@@ -868,7 +638,7 @@
     },
     "type" : "Uses",
     "typeGroup" : "COMMON",
-    "version" : 2124
+    "version" : 2416
   } ],
   "attributes" : {
     "SERVER_SCOPE" : [ ]
