@@ -122,10 +122,23 @@
         "layoutY" : 220
       },
       "configuration" : {
-        "defaultTTL" : 0,
+        "defaultTTL" : 31536000,
         "useServerTs" : false,
         "processingSettings" : {
-          "type" : "ON_EVERY_MESSAGE"
+          "type" : "ADVANCED",
+          "timeseries" : {
+            "type" : "DEDUPLICATE",
+            "deduplicationIntervalSecs" : 1800
+          },
+          "latest" : {
+            "type" : "ON_EVERY_MESSAGE"
+          },
+          "webSockets" : {
+            "type" : "ON_EVERY_MESSAGE"
+          },
+          "calculatedFields" : {
+            "type" : "ON_EVERY_MESSAGE"
+          }
         }
       },
       "configurationVersion" : 1,
@@ -403,7 +416,7 @@
     },
     "type" : "Uses",
     "typeGroup" : "COMMON",
-    "version" : 1743
+    "version" : 2124
   } ],
   "attributes" : {
     "SERVER_SCOPE" : [ ]
