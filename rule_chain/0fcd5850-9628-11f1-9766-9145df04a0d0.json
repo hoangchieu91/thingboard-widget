@@ -63,6 +63,10 @@
       "toIndex" : 16,
       "type" : "Success"
     }, {
+      "fromIndex" : 9,
+      "toIndex" : 22,
+      "type" : "Success"
+    }, {
       "fromIndex" : 11,
       "toIndex" : 0,
       "type" : "Valid_Telemetry"
@@ -108,15 +112,19 @@
       "type" : "Success"
     }, {
       "fromIndex" : 17,
-      "toIndex" : 0,
-      "type" : "Success"
-    }, {
-      "fromIndex" : 17,
       "toIndex" : 16,
       "type" : "Success"
     }, {
       "fromIndex" : 17,
       "toIndex" : 18,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 17,
+      "toIndex" : 21,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 22,
+      "toIndex" : 0,
       "type" : "Success"
     } ],
     "firstNodeIndex" : 6,
@@ -130,8 +138,7 @@
         "processingSettings" : {
           "type" : "ADVANCED",
           "timeseries" : {
-            "type" : "DEDUPLICATE",
-            "deduplicationIntervalSecs" : 60
+            "type" : "ON_EVERY_MESSAGE"
           },
           "latest" : {
             "type" : "ON_EVERY_MESSAGE"
@@ -154,7 +161,7 @@
         "entityType" : "RULE_NODE",
         "id" : "0fcff060-9628-11f1-9766-9145df04a0d0"
       },
-      "name" : "Save Timeseries (DEDUPLICATE 60s • TTL 365d)",
+      "name" : "Save Timeseries (ON_EVERY_MESSAGE • TTL 365d)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
@@ -415,8 +422,8 @@
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "// 1. Clean foreign keys if any\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hasProcessData = (msg.temperature != null || msg.kwh != null || msg.kWh != null || msg.p_total != null || msg.status != null || msg.run != null);\n\n// 2. Detect Gateway / Modbus / PLC Communication Failure (quality == BAD or error frame without process data)\nif (qStr.equals(\"BAD\") || (!errStr.isEmpty() && !hasProcessData)) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    // Still trigger Energy_Route for Power_Meter so Calendar Rollover resets kwh_today/week/month to 0 on a new day/week/month!\n    if (metadata.deviceType != null && metadata.deviceType.toString().equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    return faultRoutes;\n}\n\n// 3. Valid Telemetry received -> mark ONLINE & clear any active communication fault alarm\nmsg.quality = \"GOOD\";\nmsg.comm_status = \"ONLINE\";\nmsg.errorReason = \"\";\nmsg.last_good_ts = tsMs;\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\n\n// 4. PT100 Temperature Spike & Open/Short Circuit Hardware Guard (-45°C .. +160°C)\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 5. Power Meter Real Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 6. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;",
-        "tbelScript" : "// 1. Clean foreign keys if any\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hasProcessData = (msg.temperature != null || msg.kwh != null || msg.kWh != null || msg.p_total != null || msg.status != null || msg.run != null);\n\n// 2. Detect Gateway / Modbus / PLC Communication Failure (quality == BAD or error frame without process data)\nif (qStr.equals(\"BAD\") || (!errStr.isEmpty() && !hasProcessData)) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    // Still trigger Energy_Route for Power_Meter so Calendar Rollover resets kwh_today/week/month to 0 on a new day/week/month!\n    if (metadata.deviceType != null && metadata.deviceType.toString().equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    return faultRoutes;\n}\n\n// 3. Valid Telemetry received -> mark ONLINE & clear any active communication fault alarm\nmsg.quality = \"GOOD\";\nmsg.comm_status = \"ONLINE\";\nmsg.errorReason = \"\";\nmsg.last_good_ts = tsMs;\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\n\n// 4. PT100 Temperature Spike & Open/Short Circuit Hardware Guard (-45°C .. +160°C)\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 5. Power Meter Real Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 6. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;"
+        "jsScript" : "// 1. Strip foreign & bloat keys (sourceTs is redundant with metadata.ts and causes ts_kv bloat)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hasProcessData = (msg.temperature != null || msg.kwh != null || msg.kWh != null || msg.p_total != null || msg.status != null || msg.run != null);\n\n// 2. Detect Gateway / Modbus / PLC Communication Failure (quality == BAD or error frame without process data)\nif (qStr.equals(\"BAD\") || (!errStr.isEmpty() && !hasProcessData)) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (metadata.deviceType != null && metadata.deviceType.toString().equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    return faultRoutes;\n}\n\n// 3. Valid Telemetry received -> mark ONLINE & clear any active communication fault alarm\nmsg.quality = \"GOOD\";\nmsg.comm_status = \"ONLINE\";\nmsg.errorReason = \"\";\nmsg.last_good_ts = tsMs;\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\n\n// 4. PT100 Temperature Spike & Open/Short Circuit Hardware Guard (-45°C .. +160°C)\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 5. Power Meter Real Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 6. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;",
+        "tbelScript" : "// 1. Strip foreign & bloat keys (sourceTs is redundant with metadata.ts and causes ts_kv bloat)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hasProcessData = (msg.temperature != null || msg.kwh != null || msg.kWh != null || msg.p_total != null || msg.status != null || msg.run != null);\n\n// 2. Detect Gateway / Modbus / PLC Communication Failure (quality == BAD or error frame without process data)\nif (qStr.equals(\"BAD\") || (!errStr.isEmpty() && !hasProcessData)) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (metadata.deviceType != null && metadata.deviceType.toString().equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    return faultRoutes;\n}\n\n// 3. Valid Telemetry received -> mark ONLINE & clear any active communication fault alarm\nmsg.quality = \"GOOD\";\nmsg.comm_status = \"ONLINE\";\nmsg.errorReason = \"\";\nmsg.last_good_ts = tsMs;\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\n\n// 4. PT100 Temperature Spike & Open/Short Circuit Hardware Guard (-45°C .. +160°C)\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 5. Power Meter Real Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 6. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -685,6 +692,68 @@
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.action.TbCreateAlarmNode"
+    }, {
+      "additionalInfo" : {
+        "description" : "Cập nhật tức thời lên giao diện & bảng ts_kv_latest cho 35 biến tổng hợp mà không làm phình bảng lịch sử ts_kv",
+        "layoutX" : 1220,
+        "layoutY" : 240
+      },
+      "configuration" : {
+        "processingSettings" : {
+          "type" : "ADVANCED",
+          "timeseries" : {
+            "type" : "SKIP"
+          },
+          "latest" : {
+            "type" : "ON_EVERY_MESSAGE"
+          },
+          "webSockets" : {
+            "type" : "ON_EVERY_MESSAGE"
+          },
+          "calculatedFields" : {
+            "type" : "ON_EVERY_MESSAGE"
+          }
+        },
+        "defaultTTL" : 31536000,
+        "useServerTs" : null
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "cd20ca10-d672-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_06_SAVE_LATEST (Chỉ Lưu Latest & WebSockets • Không Ghi Rác ts_kv)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.telemetry.TbMsgTimeseriesNode"
+    }, {
+      "additionalInfo" : {
+        "description" : "Chỉ ghi delta_kwh vào bảng lịch sử ts_kv khi có điện năng tiêu thụ thực tế (> 0 kWh)",
+        "layoutX" : 1220,
+        "layoutY" : 340
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "jsScript" : "if (msg.delta_kwh == null || Double.parseDouble(msg.delta_kwh.toString()) <= 0.0) {\n    return null;\n}\nvar histMsg = {\n    \"delta_kwh\": msg.delta_kwh,\n    \"delta_kwh_normal\": msg.delta_kwh_normal,\n    \"delta_kwh_peak\": msg.delta_kwh_peak,\n    \"delta_kwh_offpeak\": msg.delta_kwh_offpeak,\n    \"kwh_today\": msg.kwh_today\n};\nreturn {msg: histMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};",
+        "tbelScript" : "if (msg.delta_kwh == null || Double.parseDouble(msg.delta_kwh.toString()) <= 0.0) {\n    return null;\n}\nvar histMsg = {\n    \"delta_kwh\": msg.delta_kwh,\n    \"delta_kwh_normal\": msg.delta_kwh_normal,\n    \"delta_kwh_peak\": msg.delta_kwh_peak,\n    \"delta_kwh_offpeak\": msg.delta_kwh_offpeak,\n    \"kwh_today\": msg.kwh_today\n};\nreturn {msg: histMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "cd20f120-d672-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_03F Lọc Delta kWh Thực Tế Ghi Lịch Sử ts_kv",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
     } ],
     "ruleChainConnections" : null
   },
@@ -713,7 +782,7 @@
     },
     "type" : "Uses",
     "typeGroup" : "COMMON",
-    "version" : 3155
+    "version" : 3251
   } ],
   "attributes" : {
     "SERVER_SCOPE" : [ ]
