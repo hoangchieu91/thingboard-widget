@@ -43,10 +43,6 @@
       "toIndex" : 19,
       "type" : "Activity Event"
     }, {
-      "fromIndex" : 2,
-      "toIndex" : 23,
-      "type" : "Post telemetry"
-    }, {
       "fromIndex" : 6,
       "toIndex" : 2,
       "type" : "Success"
@@ -100,12 +96,20 @@
       "type" : "PLC_Latest_Route"
     }, {
       "fromIndex" : 11,
+      "toIndex" : 22,
+      "type" : "PLC_Latest_Route"
+    }, {
+      "fromIndex" : 11,
       "toIndex" : 24,
       "type" : "PLC_Clean_TS_Route"
     }, {
       "fromIndex" : 11,
       "toIndex" : 25,
       "type" : "PLC_Demux_Route"
+    }, {
+      "fromIndex" : 11,
+      "toIndex" : 29,
+      "type" : "Slave_Mirror_Route"
     }, {
       "fromIndex" : 13,
       "toIndex" : 14,
@@ -156,32 +160,28 @@
       "type" : "Success"
     }, {
       "fromIndex" : 27,
+      "toIndex" : 28,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 28,
       "toIndex" : 0,
-      "type" : "Zone_Temp_TS_Route"
+      "type" : "Success"
     }, {
-      "fromIndex" : 27,
-      "toIndex" : 7,
-      "type" : "Temp_Route"
+      "fromIndex" : 28,
+      "toIndex" : 10,
+      "type" : "Success"
     }, {
-      "fromIndex" : 27,
-      "toIndex" : 16,
-      "type" : "Zone_Status_Route"
+      "fromIndex" : 29,
+      "toIndex" : 30,
+      "type" : "Success"
     }, {
-      "fromIndex" : 27,
-      "toIndex" : 17,
-      "type" : "Comm_Fault_Route"
+      "fromIndex" : 30,
+      "toIndex" : 22,
+      "type" : "Success"
     }, {
-      "fromIndex" : 27,
-      "toIndex" : 19,
-      "type" : "Comm_Restored_Route"
-    }, {
-      "fromIndex" : 27,
-      "toIndex" : 20,
-      "type" : "Sensor_Spike_Fault"
-    }, {
-      "fromIndex" : 27,
-      "toIndex" : 21,
-      "type" : "Zone_Status_Route"
+      "fromIndex" : 30,
+      "toIndex" : 25,
+      "type" : "Success"
     } ],
     "firstNodeIndex" : 6,
     "nodes" : [ {
@@ -478,8 +478,8 @@
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "var devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\n\nif (qStr.equals(\"BAD\")) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (devType.equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    if (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n        faultRoutes.add(\"PLC_Demux_Route\");\n    }\n    return faultRoutes;\n}\n\n// Special routing for ONSEN_PLC_MAIN (12 PT100 + 16 DI + 16 DO + Diagnostics)\nif (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n    var plcRoutes = [\"PLC_Latest_Route\", \"Comm_Restored_Route\"];\n    var hasPtOrDi = (\n        msg.PT100_CH01_BoiNong40 != null || msg.PT100_CH02_Jacuzzi35 != null || msg.PT100_CH03_BoiLanh28 != null ||\n        msg.PT100_CH04_BoiLanh18_1 != null || msg.PT100_CH05_BoiLanh18_2 != null || msg.PT100_CH06_SaunaKho_1 != null ||\n        msg.PT100_CH07_SaunaKho_2 != null || msg.PT100_CH08_SaunaUot_1 != null || msg.PT100_CH09_SaunaUot_2 != null ||\n        msg.PT100_CH10_PhongTuyet != null || msg.DI_BITMASK_16 != null || msg.DO_BITMASK_16 != null ||\n        msg.DI_01_X0 != null || msg.DO_01_Y0 != null || msg.FACILITY_P_TOT_KW != null\n    );\n    if (hasPtOrDi) {\n        plcRoutes.add(\"PLC_Clean_TS_Route\");\n        plcRoutes.add(\"Contactor_Route\");\n        plcRoutes.add(\"PLC_Demux_Route\");\n    }\n    return plcRoutes;\n}\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\nif (devType.equals(\"Power_Meter\") || msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\nreturn routes;\n",
-        "tbelScript" : "var devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\n\nif (qStr.equals(\"BAD\")) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (devType.equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    if (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n        faultRoutes.add(\"PLC_Demux_Route\");\n    }\n    return faultRoutes;\n}\n\n// Special routing for ONSEN_PLC_MAIN (12 PT100 + 16 DI + 16 DO + Diagnostics)\nif (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n    var plcRoutes = [\"PLC_Latest_Route\", \"Comm_Restored_Route\"];\n    var hasPtOrDi = (\n        msg.PT100_CH01_BoiNong40 != null || msg.PT100_CH02_Jacuzzi35 != null || msg.PT100_CH03_BoiLanh28 != null ||\n        msg.PT100_CH04_BoiLanh18_1 != null || msg.PT100_CH05_BoiLanh18_2 != null || msg.PT100_CH06_SaunaKho_1 != null ||\n        msg.PT100_CH07_SaunaKho_2 != null || msg.PT100_CH08_SaunaUot_1 != null || msg.PT100_CH09_SaunaUot_2 != null ||\n        msg.PT100_CH10_PhongTuyet != null || msg.DI_BITMASK_16 != null || msg.DO_BITMASK_16 != null ||\n        msg.DI_01_X0 != null || msg.DO_01_Y0 != null || msg.FACILITY_P_TOT_KW != null\n    );\n    if (hasPtOrDi) {\n        plcRoutes.add(\"PLC_Clean_TS_Route\");\n        plcRoutes.add(\"Contactor_Route\");\n        plcRoutes.add(\"PLC_Demux_Route\");\n    }\n    return plcRoutes;\n}\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\nif (devType.equals(\"Power_Meter\") || msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\nreturn routes;\n"
+        "jsScript" : "var devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\n\nif (qStr.equals(\"BAD\")) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (devType.equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n        faultRoutes.add(\"Slave_Mirror_Route\");\n    }\n    if (devType.equals(\"TK4S_Controller\")) {\n        faultRoutes.add(\"Slave_Mirror_Route\");\n    }\n    if (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n        faultRoutes.add(\"PLC_Demux_Route\");\n    }\n    return faultRoutes;\n}\n\nif (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n    var plcRoutes = [\"PLC_Latest_Route\", \"Comm_Restored_Route\"];\n    var hasPtOrDi = (\n        msg.PT100_CH01_BoiNong40 != null || msg.PT100_CH02_Jacuzzi35 != null || msg.PT100_CH03_BoiLanh28 != null ||\n        msg.PT100_CH04_BoiLanh18_1 != null || msg.PT100_CH05_BoiLanh18_2 != null || msg.PT100_CH06_SaunaKho_1 != null ||\n        msg.PT100_CH07_SaunaKho_2 != null || msg.PT100_CH08_SaunaUot_1 != null || msg.PT100_CH09_SaunaUot_2 != null ||\n        msg.PT100_CH10_PhongTuyet != null || msg.DI_BITMASK_16 != null || msg.DO_BITMASK_16 != null ||\n        msg.DI_01_X0 != null || msg.DO_01_Y0 != null || msg.FACILITY_P_TOT_KW != null\n    );\n    if (hasPtOrDi) {\n        plcRoutes.add(\"PLC_Clean_TS_Route\");\n        plcRoutes.add(\"Contactor_Route\");\n        plcRoutes.add(\"PLC_Demux_Route\");\n    }\n    return plcRoutes;\n}\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\nif (devType.equals(\"Power_Meter\") || msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n    routes.add(\"Slave_Mirror_Route\");\n}\nif (devType.equals(\"TK4S_Controller\") || msg.PV_Temp != null) {\n    routes.add(\"Slave_Mirror_Route\");\n}\nreturn routes;\n",
+        "tbelScript" : "var devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\n\nif (qStr.equals(\"BAD\")) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (devType.equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n        faultRoutes.add(\"Slave_Mirror_Route\");\n    }\n    if (devType.equals(\"TK4S_Controller\")) {\n        faultRoutes.add(\"Slave_Mirror_Route\");\n    }\n    if (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n        faultRoutes.add(\"PLC_Demux_Route\");\n    }\n    return faultRoutes;\n}\n\nif (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n    var plcRoutes = [\"PLC_Latest_Route\", \"Comm_Restored_Route\"];\n    var hasPtOrDi = (\n        msg.PT100_CH01_BoiNong40 != null || msg.PT100_CH02_Jacuzzi35 != null || msg.PT100_CH03_BoiLanh28 != null ||\n        msg.PT100_CH04_BoiLanh18_1 != null || msg.PT100_CH05_BoiLanh18_2 != null || msg.PT100_CH06_SaunaKho_1 != null ||\n        msg.PT100_CH07_SaunaKho_2 != null || msg.PT100_CH08_SaunaUot_1 != null || msg.PT100_CH09_SaunaUot_2 != null ||\n        msg.PT100_CH10_PhongTuyet != null || msg.DI_BITMASK_16 != null || msg.DO_BITMASK_16 != null ||\n        msg.DI_01_X0 != null || msg.DO_01_Y0 != null || msg.FACILITY_P_TOT_KW != null\n    );\n    if (hasPtOrDi) {\n        plcRoutes.add(\"PLC_Clean_TS_Route\");\n        plcRoutes.add(\"Contactor_Route\");\n        plcRoutes.add(\"PLC_Demux_Route\");\n    }\n    return plcRoutes;\n}\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\nif (devType.equals(\"Power_Meter\") || msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n    routes.add(\"Slave_Mirror_Route\");\n}\nif (devType.equals(\"TK4S_Controller\") || msg.PV_Temp != null) {\n    routes.add(\"Slave_Mirror_Route\");\n}\nreturn routes;\n"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -812,14 +812,14 @@
       "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
     }, {
       "additionalInfo" : {
-        "description" : "Chuẩn hóa p_a/b/c, quality, comm_status và lọc PLC_Heartbeat trên slave",
-        "layoutX" : 360,
-        "layoutY" : 260
+        "layoutX" : 180,
+        "layoutY" : 520,
+        "description" : "Normalize quality/comm_status and map Power_Active_A/B/C"
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "// Pre-process & normalize incoming telemetry from AMI-Gateway (20 Live Devices)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\n\nif (devName.startsWith(\"54A_\")) {\n    return null;\n}\n\n// Strip PLC_Heartbeat from slave devices (TK4S & ADL400) so it never pollutes ts_kv\nif (!devName.equals(\"ONSEN_PLC_MAIN\")) {\n    msg.remove(\"PLC_Heartbeat\");\n}\n\n// Map 3-phase power keys on Acrel ADL400 meters\nif (msg.Power_Active_A != null && msg.p_a == null) { msg.p_a = msg.Power_Active_A; }\nif (msg.Power_Active_B != null && msg.p_b == null) { msg.p_b = msg.Power_Active_B; }\nif (msg.Power_Active_C != null && msg.p_c == null) { msg.p_c = msg.Power_Active_C; }\nif (msg.v_a != null && msg.u_a == null) { msg.u_a = msg.v_a; }\nif (msg.v_b != null && msg.u_b == null) { msg.u_b = msg.v_b; }\nif (msg.v_c != null && msg.u_c == null) { msg.u_c = msg.v_c; }\n\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hcStr = msg.health_chain_code != null ? msg.health_chain_code.toString().trim() : \"\";\nif (errStr.isEmpty() && !hcStr.isEmpty() && !hcStr.equals(\"OK\")) {\n    errStr = hcStr;\n}\n\nvar isChainBad = false;\nif (msg.gw_tcp_ok != null && (msg.gw_tcp_ok.toString().equals(\"0\") || msg.gw_tcp_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.plc_run_ok != null && (msg.plc_run_ok.toString().equals(\"0\") || msg.plc_run_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.rs485_comm_ok != null && (msg.rs485_comm_ok.toString().equals(\"0\") || msg.rs485_comm_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.Comm_OK != null && (msg.Comm_OK.toString().equals(\"0\") || msg.Comm_OK.toString().equals(\"false\"))) { isChainBad = true; }\n\nif (qStr.equals(\"BAD\") || isChainBad) {\n    msg.quality = \"BAD\";\n    msg.comm_status = \"OFFLINE\";\n    msg.online = 0;\n    msg.errorReason = errStr.isEmpty() ? \"MODBUS_PLC_OFFLINE\" : errStr;\n} else {\n    msg.quality = \"GOOD\";\n    msg.comm_status = \"ONLINE\";\n    msg.online = 1;\n    msg.errorReason = \"\";\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};\n",
-        "tbelScript" : "// Pre-process & normalize incoming telemetry from AMI-Gateway (20 Live Devices)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\n\nif (devName.startsWith(\"54A_\")) {\n    return null;\n}\n\n// Strip PLC_Heartbeat from slave devices (TK4S & ADL400) so it never pollutes ts_kv\nif (!devName.equals(\"ONSEN_PLC_MAIN\")) {\n    msg.remove(\"PLC_Heartbeat\");\n}\n\n// Map 3-phase power keys on Acrel ADL400 meters\nif (msg.Power_Active_A != null && msg.p_a == null) { msg.p_a = msg.Power_Active_A; }\nif (msg.Power_Active_B != null && msg.p_b == null) { msg.p_b = msg.Power_Active_B; }\nif (msg.Power_Active_C != null && msg.p_c == null) { msg.p_c = msg.Power_Active_C; }\nif (msg.v_a != null && msg.u_a == null) { msg.u_a = msg.v_a; }\nif (msg.v_b != null && msg.u_b == null) { msg.u_b = msg.v_b; }\nif (msg.v_c != null && msg.u_c == null) { msg.u_c = msg.v_c; }\n\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hcStr = msg.health_chain_code != null ? msg.health_chain_code.toString().trim() : \"\";\nif (errStr.isEmpty() && !hcStr.isEmpty() && !hcStr.equals(\"OK\")) {\n    errStr = hcStr;\n}\n\nvar isChainBad = false;\nif (msg.gw_tcp_ok != null && (msg.gw_tcp_ok.toString().equals(\"0\") || msg.gw_tcp_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.plc_run_ok != null && (msg.plc_run_ok.toString().equals(\"0\") || msg.plc_run_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.rs485_comm_ok != null && (msg.rs485_comm_ok.toString().equals(\"0\") || msg.rs485_comm_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.Comm_OK != null && (msg.Comm_OK.toString().equals(\"0\") || msg.Comm_OK.toString().equals(\"false\"))) { isChainBad = true; }\n\nif (qStr.equals(\"BAD\") || isChainBad) {\n    msg.quality = \"BAD\";\n    msg.comm_status = \"OFFLINE\";\n    msg.online = 0;\n    msg.errorReason = errStr.isEmpty() ? \"MODBUS_PLC_OFFLINE\" : errStr;\n} else {\n    msg.quality = \"GOOD\";\n    msg.comm_status = \"ONLINE\";\n    msg.online = 1;\n    msg.errorReason = \"\";\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};\n"
+        "jsScript" : "// Pre-process & normalize incoming telemetry from AMI-Gateway (20 Live Devices)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\n\nif (devName.startsWith(\"54A_\")) {\n    return null;\n}\n\nif (!devName.equals(\"ONSEN_PLC_MAIN\")) {\n    msg.remove(\"PLC_Heartbeat\");\n}\n\nif (msg.Power_Active_A != null && msg.p_a == null) { msg.p_a = msg.Power_Active_A; }\nif (msg.Power_Active_B != null && msg.p_b == null) { msg.p_b = msg.Power_Active_B; }\nif (msg.Power_Active_C != null && msg.p_c == null) { msg.p_c = msg.Power_Active_C; }\nif (msg.v_a != null && msg.u_a == null) { msg.u_a = msg.v_a; }\nif (msg.v_b != null && msg.u_b == null) { msg.u_b = msg.v_b; }\nif (msg.v_c != null && msg.u_c == null) { msg.u_c = msg.v_c; }\n\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hcStr = msg.health_chain_code != null ? msg.health_chain_code.toString().trim() : \"\";\nif (errStr.isEmpty() && !hcStr.isEmpty() && !hcStr.equals(\"OK\")) {\n    errStr = hcStr;\n}\n\nvar isChainBad = false;\nif (msg.gw_tcp_ok != null && (msg.gw_tcp_ok.toString().equals(\"0\") || msg.gw_tcp_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.plc_run_ok != null && (msg.plc_run_ok.toString().equals(\"0\") || msg.plc_run_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.rs485_comm_ok != null && (msg.rs485_comm_ok.toString().equals(\"0\") || msg.rs485_comm_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.Comm_OK != null && (msg.Comm_OK.toString().equals(\"0\") || msg.Comm_OK.toString().equals(\"false\"))) { isChainBad = true; }\n\nif (qStr.equals(\"BAD\") || isChainBad) {\n    msg.quality = \"BAD\";\n    msg.comm_status = \"OFFLINE\";\n    msg.online = 0;\n    msg.errorReason = errStr.isEmpty() ? \"MODBUS_PLC_OFFLINE\" : errStr;\n} else {\n    msg.quality = \"GOOD\";\n    msg.comm_status = \"ONLINE\";\n    msg.online = 1;\n    msg.errorReason = \"\";\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};\n",
+        "tbelScript" : "// Pre-process & normalize incoming telemetry from AMI-Gateway (20 Live Devices)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\n\nif (devName.startsWith(\"54A_\")) {\n    return null;\n}\n\nif (!devName.equals(\"ONSEN_PLC_MAIN\")) {\n    msg.remove(\"PLC_Heartbeat\");\n}\n\nif (msg.Power_Active_A != null && msg.p_a == null) { msg.p_a = msg.Power_Active_A; }\nif (msg.Power_Active_B != null && msg.p_b == null) { msg.p_b = msg.Power_Active_B; }\nif (msg.Power_Active_C != null && msg.p_c == null) { msg.p_c = msg.Power_Active_C; }\nif (msg.v_a != null && msg.u_a == null) { msg.u_a = msg.v_a; }\nif (msg.v_b != null && msg.u_b == null) { msg.u_b = msg.v_b; }\nif (msg.v_c != null && msg.u_c == null) { msg.u_c = msg.v_c; }\n\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hcStr = msg.health_chain_code != null ? msg.health_chain_code.toString().trim() : \"\";\nif (errStr.isEmpty() && !hcStr.isEmpty() && !hcStr.equals(\"OK\")) {\n    errStr = hcStr;\n}\n\nvar isChainBad = false;\nif (msg.gw_tcp_ok != null && (msg.gw_tcp_ok.toString().equals(\"0\") || msg.gw_tcp_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.plc_run_ok != null && (msg.plc_run_ok.toString().equals(\"0\") || msg.plc_run_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.rs485_comm_ok != null && (msg.rs485_comm_ok.toString().equals(\"0\") || msg.rs485_comm_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.Comm_OK != null && (msg.Comm_OK.toString().equals(\"0\") || msg.Comm_OK.toString().equals(\"false\"))) { isChainBad = true; }\n\nif (qStr.equals(\"BAD\") || isChainBad) {\n    msg.quality = \"BAD\";\n    msg.comm_status = \"OFFLINE\";\n    msg.online = 0;\n    msg.errorReason = errStr.isEmpty() ? \"MODBUS_PLC_OFFLINE\" : errStr;\n} else {\n    msg.quality = \"GOOD\";\n    msg.comm_status = \"ONLINE\";\n    msg.online = 1;\n    msg.errorReason = \"\";\n}\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};\n"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -827,18 +827,18 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "ebecf2b0-d678-11f1-a6d9-970576ca9a33"
+        "id" : "e1c10c50-d67c-11f1-a6d9-970576ca9a33"
       },
-      "name" : "AI_00 Chuẩn Hóa Khóa 3 Pha & Trạng Thái Kết Nối (Pre-Normalizer)",
+      "name" : "AI_00: Chuẩn Hóa Gói Tin & Lọc Rác (Pre-Normalizer)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
     }, {
       "additionalInfo" : {
-        "description" : "Loại bỏ các biến đếm chu kỳ quét 2s khỏi lịch sử ts_kv",
-        "layoutX" : 820,
-        "layoutY" : 80
+        "layoutX" : 620,
+        "layoutY" : 880,
+        "description" : "Strip 2-second scan counters before writing ONSEN_PLC_MAIN to ts_kv"
       },
       "configuration" : {
         "scriptLang" : "TBEL",
@@ -851,23 +851,51 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "ebed19c0-d678-11f1-a6d9-970576ca9a33"
+        "id" : "e1c10c51-d67c-11f1-a6d9-970576ca9a33"
       },
-      "name" : "AI_07A Lọc Biến Nhịp Tim PLC Trước Khi Ghi Lịch Sử ts_kv",
+      "name" : "AI_07A: Lọc Biến Đếm 2s Khỏi Lịch Sử PLC (Zero ts_kv Bloat)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
     }, {
       "additionalInfo" : {
-        "description" : "Bóc tách 12 kênh PT100 & 16 kênh DI từ ONSEN_PLC_MAIN sang 9 Zone Assets",
-        "layoutX" : 820,
-        "layoutY" : 260
+        "layoutX" : 620,
+        "layoutY" : 960,
+        "description" : "Load station_io_matrix_json and latest multi-source values from ONSEN_PLC_MAIN"
+      },
+      "configuration" : {
+        "tellFailureIfAbsent" : false,
+        "fetchTo" : "METADATA",
+        "clientAttributeNames" : [ ],
+        "sharedAttributeNames" : [ ],
+        "serverAttributeNames" : [ "station_io_matrix_json" ],
+        "latestTsKeyNames" : [ "PT100_CH01_BoiNong40", "PT100_CH02_Jacuzzi35", "PT100_CH03_BoiLanh28", "PT100_CH04_BoiLanh18_1", "PT100_CH05_BoiLanh18_2", "PT100_CH06_SaunaKho_1", "PT100_CH07_SaunaKho_2", "PT100_CH08_SaunaUot_1", "PT100_CH09_SaunaUot_2", "PT100_CH10_PhongTuyet", "PT100_CH11_CapNhiet_1", "PT100_CH12_CapNhiet_2", "DI_01_X0", "DI_02_X1", "DI_03_X2", "DI_04_X3", "DI_05_X4", "DI_06_X5", "DI_07_X6", "DI_08_X7", "DI_09_X10", "DI_10_X11", "DI_11_X12", "DI_12_X13", "DI_13_X14", "DI_14_X15", "DI_15_X16", "DI_16_X17", "DO_01_Y0", "DO_02_Y1", "DO_03_Y2", "DO_04_Y3", "DO_05_Y4", "DO_06_Y5", "DO_07_Y6", "DO_08_Y7", "DO_09_Y10", "DO_10_Y11", "DO_11_Y12", "DO_12_Y13", "DO_13_Y14", "DO_14_Y15", "DO_15_Y16", "DO_16_Y17", "ONSEN_TK4S_01_PV", "ONSEN_TK4S_01_SV", "ONSEN_TK4S_01_OK", "ONSEN_TK4S_02_PV", "ONSEN_TK4S_02_SV", "ONSEN_TK4S_02_OK", "ONSEN_TK4S_03_PV", "ONSEN_TK4S_03_SV", "ONSEN_TK4S_03_OK", "ONSEN_TK4S_04_PV", "ONSEN_TK4S_04_SV", "ONSEN_TK4S_04_OK", "ONSEN_TK4S_05_PV", "ONSEN_TK4S_05_SV", "ONSEN_TK4S_05_OK", "ONSEN_ADL400_01_P", "ONSEN_ADL400_01_PA", "ONSEN_ADL400_01_PB", "ONSEN_ADL400_01_PC", "ONSEN_ADL400_02_P", "ONSEN_ADL400_02_PA", "ONSEN_ADL400_02_PB", "ONSEN_ADL400_02_PC", "ONSEN_ADL400_03_P", "ONSEN_ADL400_03_PA", "ONSEN_ADL400_03_PB", "ONSEN_ADL400_03_PC", "ONSEN_ADL400_04_P", "ONSEN_ADL400_04_PA", "ONSEN_ADL400_04_PB", "ONSEN_ADL400_04_PC", "ONSEN_ADL400_05_P", "ONSEN_ADL400_05_PA", "ONSEN_ADL400_05_PB", "ONSEN_ADL400_05_PC", "ONSEN_ADL400_06_P", "ONSEN_ADL400_06_PA", "ONSEN_ADL400_06_PB", "ONSEN_ADL400_06_PC", "ONSEN_ADL400_07_P", "ONSEN_ADL400_07_PA", "ONSEN_ADL400_07_PB", "ONSEN_ADL400_07_PC", "ONSEN_ADL400_08_P", "ONSEN_ADL400_08_PA", "ONSEN_ADL400_08_PB", "ONSEN_ADL400_08_PC", "ONSEN_ADL400_09_P", "ONSEN_ADL400_09_PA", "ONSEN_ADL400_09_PB", "ONSEN_ADL400_09_PC", "ONSEN_ADL400_10_P", "ONSEN_ADL400_10_PA", "ONSEN_ADL400_10_PB", "ONSEN_ADL400_10_PC", "ONSEN_ADL400_11_P", "ONSEN_ADL400_11_PA", "ONSEN_ADL400_11_PB", "ONSEN_ADL400_11_PC", "ONSEN_ADL400_12_P", "ONSEN_ADL400_12_PA", "ONSEN_ADL400_12_PB", "ONSEN_ADL400_12_PC", "ONSEN_ADL400_13_P", "ONSEN_ADL400_13_PA", "ONSEN_ADL400_13_PB", "ONSEN_ADL400_13_PC", "ONSEN_ADL400_14_P", "ONSEN_ADL400_14_PA", "ONSEN_ADL400_14_PB", "ONSEN_ADL400_14_PC" ],
+        "getLatestValueWithTs" : false
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "e1c10c52-d67c-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_07_ATTR: Nạp Ma Trận Đấu Nối Mềm Đa Nguồn (station_io_matrix_json)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.metadata.TbGetAttributesNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 940,
+        "layoutY" : 960,
+        "description" : "Demultiplex multi-source temperature & machine status using station_io_matrix_json"
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "// Demultiplex ONSEN_PLC_MAIN (12 PT100 + 16 DI) to the 9 Zone Assets (AST_*)\nvar isOff = (msg.quality != null && msg.quality.toString().toUpperCase().equals(\"BAD\"));\nvar errStr = msg.errorReason != null ? msg.errorReason.toString() : \"\";\nvar fMask = msg.PT100_FAULT_MASK != null ? Integer.parseInt(msg.PT100_FAULT_MASK.toString()) : 0;\nvar diMask = msg.DI_BITMASK_16 != null ? Integer.parseInt(msg.DI_BITMASK_16.toString()) : -1;\n\nvar zones = [\n    {\"ast\": \"AST_COLD_POOL_28\", \"z\": \"Z01\", \"pt\": \"PT100_CH03_BoiLanh28\",   \"ptAlt\": \"PT100_CH01_BeLanh_28C\",  \"chBit\": 2, \"di\": [\"DI_01_X0\"], \"diBits\": [0]},\n    {\"ast\": \"AST_COLD_POOL_1\",  \"z\": \"Z02\", \"pt\": \"PT100_CH04_BoiLanh18_1\", \"ptAlt\": \"PT100_CH02_BeLanh_1_15C\",\"chBit\": 3, \"di\": [\"DI_02_X1\"], \"diBits\": [1]},\n    {\"ast\": \"AST_COLD_POOL_2\",  \"z\": \"Z03\", \"pt\": \"PT100_CH05_BoiLanh18_2\", \"ptAlt\": \"PT100_CH03_BeLanh_2_10C\",\"chBit\": 4, \"di\": [\"DI_03_X2\"], \"diBits\": [2]},\n    {\"ast\": \"AST_JACUZZI_35\",   \"z\": \"Z04\", \"pt\": \"PT100_CH02_Jacuzzi35\",   \"ptAlt\": \"PT100_CH04_Jacuzzi_38C\", \"chBit\": 1, \"di\": [\"DI_04_X3\"], \"diBits\": [3]},\n    {\"ast\": \"AST_HOT_POOL_40\",  \"z\": \"Z05\", \"pt\": \"PT100_CH01_BoiNong40\",   \"ptAlt\": \"PT100_CH05_BeNong_42C\",  \"chBit\": 0, \"di\": [\"DI_05_X4\", \"DI_15_X16\"], \"diBits\": [4, 14]},\n    {\"ast\": \"AST_SAUNA_DRY\",    \"z\": \"Z06\", \"pt\": \"PT100_CH06_SaunaKho_1\",  \"ptAlt\": \"PT100_CH07_SaunaKho_2\",  \"chBit\": 5, \"di\": [\"DI_06_X5\", \"DI_07_X6\", \"DI_08_X7\"], \"diBits\": [5, 6, 7]},\n    {\"ast\": \"AST_STEAM_BIG\",    \"z\": \"Z07\", \"pt\": \"PT100_CH08_SaunaUot_1\",  \"ptAlt\": \"PT100_CH08_SaunaUot_Lon\",\"chBit\": 7, \"di\": [\"DI_09_X10\", \"DI_10_X11\"], \"diBits\": [8, 9]},\n    {\"ast\": \"AST_STEAM_SMALL\",  \"z\": \"Z08\", \"pt\": \"PT100_CH09_SaunaUot_2\",  \"ptAlt\": \"PT100_CH09_SaunaUot_Nho\",\"chBit\": 8, \"di\": [\"DI_11_X12\"], \"diBits\": [10]},\n    {\"ast\": \"AST_SNOW_ROOM\",    \"z\": \"Z09\", \"pt\": \"PT100_CH10_PhongTuyet\",  \"ptAlt\": \"PT100_CH10_PhongTuyet\",  \"chBit\": 9, \"di\": [\"DI_12_X13\", \"DI_13_X14\", \"DI_14_X15\"], \"diBits\": [11, 12, 13]}\n];\n\nvar outList = [];\nfor (var i = 0; i < zones.size(); i++) {\n    var z = zones[i];\n    var zMsg = {};\n    var touched = false;\n\n    var rawT = msg[z.pt] != null ? msg[z.pt] : msg[z.ptAlt];\n    var wireFault = ((fMask & (1 << z.chBit)) != 0);\n\n    if (isOff) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"OFFLINE\";\n        zMsg.online = 0;\n        zMsg.errorReason = errStr.isEmpty() ? \"PLC_MODBUS_OFFLINE\" : errStr;\n        touched = true;\n    } else if (wireFault) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"SENSOR_FAULT\";\n        zMsg.online = 0;\n        zMsg.errorReason = \"PT100_WIRE_BREAK:\" + z.pt;\n        touched = true;\n    } else if (rawT != null) {\n        var tVal = Double.parseDouble(rawT.toString());\n        if (z.z.equals(\"Z06\") && msg.PT100_CH07_SaunaKho_2 != null) {\n            var t2 = Double.parseDouble(msg.PT100_CH07_SaunaKho_2.toString());\n            zMsg.temperature_ch1 = tVal;\n            zMsg.temperature_ch2 = t2;\n            tVal = Math.round(((tVal + t2) / 2.0) * 10.0) / 10.0;\n        }\n        if (z.z.equals(\"Z05\")) {\n            if (msg.PT100_CH11_CapNhiet_1 != null) { zMsg.temp_supply_1 = Double.parseDouble(msg.PT100_CH11_CapNhiet_1.toString()); }\n            if (msg.PT100_CH12_CapNhiet_2 != null) { zMsg.temp_supply_2 = Double.parseDouble(msg.PT100_CH12_CapNhiet_2.toString()); }\n        }\n        zMsg.temperature = tVal;\n        zMsg.quality = \"GOOD\";\n        zMsg.comm_status = \"ONLINE\";\n        zMsg.online = 1;\n        zMsg.errorReason = \"\";\n        touched = true;\n    }\n\n    var dList = z.di;\n    var bList = z.diBits;\n    var runCnt = 0;\n    var hasDiUpdate = false;\n    for (var j = 0; j < dList.size(); j++) {\n        var dk = dList[j];\n        var db = bList[j];\n        if (msg[dk] != null) {\n            hasDiUpdate = true;\n            var sv = msg[dk].toString().trim().toUpperCase();\n            if (sv.equals(\"1\") || sv.equals(\"1.0\") || sv.equals(\"TRUE\") || sv.equals(\"ON\")) {\n                runCnt = runCnt + 1;\n            }\n        } else if (diMask >= 0) {\n            hasDiUpdate = true;\n            if ((diMask & (1 << db)) != 0) {\n                runCnt = runCnt + 1;\n            }\n        }\n    }\n\n    if (hasDiUpdate && !isOff) {\n        zMsg.di_running_count = runCnt;\n        zMsg.di_total_count = dList.size();\n        zMsg.di_primary_status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        zMsg.status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        if (zMsg.quality == null) {\n            zMsg.quality = \"GOOD\";\n            zMsg.comm_status = \"ONLINE\";\n            zMsg.online = 1;\n            zMsg.errorReason = \"\";\n        }\n        touched = true;\n    }\n\n    if (touched) {\n        var zMeta = {};\n        foreach (k : metadata.keySet()) {\n            zMeta[k] = metadata[k];\n        }\n        zMeta.targetAssetName = z.ast;\n        zMeta.deviceName = z.ast;\n        zMeta.deviceType = \"Onsen_Zone\";\n        outList.add({msg: zMsg, metadata: zMeta, msgType: \"POST_TELEMETRY_REQUEST\"});\n    }\n}\n\nreturn outList;\n",
-        "tbelScript" : "// Demultiplex ONSEN_PLC_MAIN (12 PT100 + 16 DI) to the 9 Zone Assets (AST_*)\nvar isOff = (msg.quality != null && msg.quality.toString().toUpperCase().equals(\"BAD\"));\nvar errStr = msg.errorReason != null ? msg.errorReason.toString() : \"\";\nvar fMask = msg.PT100_FAULT_MASK != null ? Integer.parseInt(msg.PT100_FAULT_MASK.toString()) : 0;\nvar diMask = msg.DI_BITMASK_16 != null ? Integer.parseInt(msg.DI_BITMASK_16.toString()) : -1;\n\nvar zones = [\n    {\"ast\": \"AST_COLD_POOL_28\", \"z\": \"Z01\", \"pt\": \"PT100_CH03_BoiLanh28\",   \"ptAlt\": \"PT100_CH01_BeLanh_28C\",  \"chBit\": 2, \"di\": [\"DI_01_X0\"], \"diBits\": [0]},\n    {\"ast\": \"AST_COLD_POOL_1\",  \"z\": \"Z02\", \"pt\": \"PT100_CH04_BoiLanh18_1\", \"ptAlt\": \"PT100_CH02_BeLanh_1_15C\",\"chBit\": 3, \"di\": [\"DI_02_X1\"], \"diBits\": [1]},\n    {\"ast\": \"AST_COLD_POOL_2\",  \"z\": \"Z03\", \"pt\": \"PT100_CH05_BoiLanh18_2\", \"ptAlt\": \"PT100_CH03_BeLanh_2_10C\",\"chBit\": 4, \"di\": [\"DI_03_X2\"], \"diBits\": [2]},\n    {\"ast\": \"AST_JACUZZI_35\",   \"z\": \"Z04\", \"pt\": \"PT100_CH02_Jacuzzi35\",   \"ptAlt\": \"PT100_CH04_Jacuzzi_38C\", \"chBit\": 1, \"di\": [\"DI_04_X3\"], \"diBits\": [3]},\n    {\"ast\": \"AST_HOT_POOL_40\",  \"z\": \"Z05\", \"pt\": \"PT100_CH01_BoiNong40\",   \"ptAlt\": \"PT100_CH05_BeNong_42C\",  \"chBit\": 0, \"di\": [\"DI_05_X4\", \"DI_15_X16\"], \"diBits\": [4, 14]},\n    {\"ast\": \"AST_SAUNA_DRY\",    \"z\": \"Z06\", \"pt\": \"PT100_CH06_SaunaKho_1\",  \"ptAlt\": \"PT100_CH07_SaunaKho_2\",  \"chBit\": 5, \"di\": [\"DI_06_X5\", \"DI_07_X6\", \"DI_08_X7\"], \"diBits\": [5, 6, 7]},\n    {\"ast\": \"AST_STEAM_BIG\",    \"z\": \"Z07\", \"pt\": \"PT100_CH08_SaunaUot_1\",  \"ptAlt\": \"PT100_CH08_SaunaUot_Lon\",\"chBit\": 7, \"di\": [\"DI_09_X10\", \"DI_10_X11\"], \"diBits\": [8, 9]},\n    {\"ast\": \"AST_STEAM_SMALL\",  \"z\": \"Z08\", \"pt\": \"PT100_CH09_SaunaUot_2\",  \"ptAlt\": \"PT100_CH09_SaunaUot_Nho\",\"chBit\": 8, \"di\": [\"DI_11_X12\"], \"diBits\": [10]},\n    {\"ast\": \"AST_SNOW_ROOM\",    \"z\": \"Z09\", \"pt\": \"PT100_CH10_PhongTuyet\",  \"ptAlt\": \"PT100_CH10_PhongTuyet\",  \"chBit\": 9, \"di\": [\"DI_12_X13\", \"DI_13_X14\", \"DI_14_X15\"], \"diBits\": [11, 12, 13]}\n];\n\nvar outList = [];\nfor (var i = 0; i < zones.size(); i++) {\n    var z = zones[i];\n    var zMsg = {};\n    var touched = false;\n\n    var rawT = msg[z.pt] != null ? msg[z.pt] : msg[z.ptAlt];\n    var wireFault = ((fMask & (1 << z.chBit)) != 0);\n\n    if (isOff) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"OFFLINE\";\n        zMsg.online = 0;\n        zMsg.errorReason = errStr.isEmpty() ? \"PLC_MODBUS_OFFLINE\" : errStr;\n        touched = true;\n    } else if (wireFault) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"SENSOR_FAULT\";\n        zMsg.online = 0;\n        zMsg.errorReason = \"PT100_WIRE_BREAK:\" + z.pt;\n        touched = true;\n    } else if (rawT != null) {\n        var tVal = Double.parseDouble(rawT.toString());\n        if (z.z.equals(\"Z06\") && msg.PT100_CH07_SaunaKho_2 != null) {\n            var t2 = Double.parseDouble(msg.PT100_CH07_SaunaKho_2.toString());\n            zMsg.temperature_ch1 = tVal;\n            zMsg.temperature_ch2 = t2;\n            tVal = Math.round(((tVal + t2) / 2.0) * 10.0) / 10.0;\n        }\n        if (z.z.equals(\"Z05\")) {\n            if (msg.PT100_CH11_CapNhiet_1 != null) { zMsg.temp_supply_1 = Double.parseDouble(msg.PT100_CH11_CapNhiet_1.toString()); }\n            if (msg.PT100_CH12_CapNhiet_2 != null) { zMsg.temp_supply_2 = Double.parseDouble(msg.PT100_CH12_CapNhiet_2.toString()); }\n        }\n        zMsg.temperature = tVal;\n        zMsg.quality = \"GOOD\";\n        zMsg.comm_status = \"ONLINE\";\n        zMsg.online = 1;\n        zMsg.errorReason = \"\";\n        touched = true;\n    }\n\n    var dList = z.di;\n    var bList = z.diBits;\n    var runCnt = 0;\n    var hasDiUpdate = false;\n    for (var j = 0; j < dList.size(); j++) {\n        var dk = dList[j];\n        var db = bList[j];\n        if (msg[dk] != null) {\n            hasDiUpdate = true;\n            var sv = msg[dk].toString().trim().toUpperCase();\n            if (sv.equals(\"1\") || sv.equals(\"1.0\") || sv.equals(\"TRUE\") || sv.equals(\"ON\")) {\n                runCnt = runCnt + 1;\n            }\n        } else if (diMask >= 0) {\n            hasDiUpdate = true;\n            if ((diMask & (1 << db)) != 0) {\n                runCnt = runCnt + 1;\n            }\n        }\n    }\n\n    if (hasDiUpdate && !isOff) {\n        zMsg.di_running_count = runCnt;\n        zMsg.di_total_count = dList.size();\n        zMsg.di_primary_status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        zMsg.status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        if (zMsg.quality == null) {\n            zMsg.quality = \"GOOD\";\n            zMsg.comm_status = \"ONLINE\";\n            zMsg.online = 1;\n            zMsg.errorReason = \"\";\n        }\n        touched = true;\n    }\n\n    if (touched) {\n        var zMeta = {};\n        foreach (k : metadata.keySet()) {\n            zMeta[k] = metadata[k];\n        }\n        zMeta.targetAssetName = z.ast;\n        zMeta.deviceName = z.ast;\n        zMeta.deviceType = \"Onsen_Zone\";\n        outList.add({msg: zMsg, metadata: zMeta, msgType: \"POST_TELEMETRY_REQUEST\"});\n    }\n}\n\nreturn outList;\n"
+        "jsScript" : "// 100% Soft-Configured Multi-Source Demultiplexer (Zero Hardcoded Channels)\n// Reads station_io_matrix_json from ONSEN_PLC_MAIN SERVER_SCOPE attribute\nvar isPlcOff = (msg.quality != null && msg.quality.toString().toUpperCase().equals(\"BAD\"));\nvar errStr = msg.errorReason != null ? msg.errorReason.toString() : \"\";\nvar fMask = msg.PT100_FAULT_MASK != null ? Integer.parseInt(msg.PT100_FAULT_MASK.toString()) : 0;\nvar diMask = msg.DI_BITMASK_16 != null ? Integer.parseInt(msg.DI_BITMASK_16.toString()) : -1;\n\nvar matrixRaw = metadata.ss_station_io_matrix_json;\nif (matrixRaw == null || matrixRaw.toString().trim().isEmpty()) {\n    return null;\n}\nvar matrixObj = JSON.parse(matrixRaw.toString());\nvar zonesMap = matrixObj.zones;\nif (zonesMap == null) {\n    return null;\n}\n\n// Helper to read value from msg first, then metadata (latest telemetry on ONSEN_PLC_MAIN)\nfunction getVal(key) {\n    if (key == null || key.equals(\"NONE\") || key.isEmpty()) return null;\n    if (msg[key] != null) return msg[key];\n    if (metadata[key] != null) return metadata[key];\n    return null;\n}\n\nvar outList = [];\nforeach (zEntry : zonesMap.entrySet()) {\n    var zCode = zEntry.getKey();\n    var zCfg = zEntry.getValue();\n    var astName = zCfg.assetName;\n    if (astName == null || astName.toString().isEmpty()) continue;\n\n    var zMsg = {};\n    var touched = false;\n\n    // 1. MULTI-SOURCE TEMPERATURE RESOLUTION (PT100 + TK4S Modbus + Offset + Fallback)\n    var tCfg = zCfg.tempConfig != null ? zCfg.tempConfig : {};\n    var tMode = tCfg.mode != null ? tCfg.mode.toString() : \"AUTO_PT100_FIRST\";\n    var pt1Key = tCfg.pt100Primary != null ? tCfg.pt100Primary.toString() : \"NONE\";\n    var pt2Key = tCfg.pt100Secondary != null ? tCfg.pt100Secondary.toString() : \"NONE\";\n    var tkDev = tCfg.tk4sDevice != null ? tCfg.tk4sDevice.toString() : \"NONE\";\n    var offsetC = tCfg.offsetC != null ? Double.parseDouble(tCfg.offsetC.toString()) : 0.0;\n    var maxDiffC = tCfg.maxDiffWarnC != null ? Double.parseDouble(tCfg.maxDiffWarnC.toString()) : 2.5;\n\n    var rawPt1 = getVal(pt1Key);\n    var rawPt2 = getVal(pt2Key);\n    var rawTkPv = (!tkDev.equals(\"NONE\")) ? getVal(tkDev + \"_PV\") : null;\n    var rawTkSv = (!tkDev.equals(\"NONE\")) ? getVal(tkDev + \"_SV\") : null;\n    var rawTkOk = (!tkDev.equals(\"NONE\")) ? getVal(tkDev + \"_OK\") : null;\n\n    var pt1Valid = (!isPlcOff && rawPt1 != null);\n    var pt2Valid = (!isPlcOff && rawPt2 != null);\n    var tkValid = (rawTkPv != null && (rawTkOk == null || !rawTkOk.toString().equals(\"0\")));\n\n    var ptVal = 0.0;\n    if (pt1Valid) {\n        ptVal = Double.parseDouble(rawPt1.toString());\n        if (ptVal < -50.0 || ptVal > 250.0) { pt1Valid = false; }\n    }\n    var pt2Val = 0.0;\n    if (pt2Valid) {\n        pt2Val = Double.parseDouble(rawPt2.toString());\n        if (pt2Val < -50.0 || pt2Val > 250.0) { pt2Valid = false; }\n    }\n    var tkVal = 0.0;\n    if (tkValid) {\n        tkVal = Double.parseDouble(rawTkPv.toString());\n        if (tkVal < -50.0 || tkVal > 250.0) { tkValid = false; }\n    }\n\n    if (pt1Valid) { zMsg.temp_pt100 = Math.round((ptVal + offsetC) * 10.0) / 10.0; }\n    if (pt2Valid) { zMsg.temperature_ch2 = Math.round((pt2Val + offsetC) * 10.0) / 10.0; }\n    if (tkValid)  { zMsg.temp_tk4s = Math.round(tkVal * 10.0) / 10.0; }\n    if (rawTkSv != null) { zMsg.tk4s_sv = Double.parseDouble(rawTkSv.toString()); }\n\n    if (pt1Valid && tkValid) {\n        var diff = Math.abs((ptVal + offsetC) - tkVal);\n        zMsg.temp_diff = Math.round(diff * 10.0) / 10.0;\n        zMsg.temp_drift_warn = (diff > maxDiffC) ? 1 : 0;\n    }\n\n    var finalT = null;\n    var activeSrc = \"NONE\";\n\n    if (tMode.equals(\"PT100_ONLY\")) {\n        if (pt1Valid) { finalT = ptVal + offsetC; activeSrc = \"PT100 (\" + pt1Key + \")\"; }\n    } else if (tMode.equals(\"TK4S_ONLY\")) {\n        if (tkValid) { finalT = tkVal + offsetC; activeSrc = \"TK4S (\" + tkDev + \")\"; }\n    } else if (tMode.equals(\"AUTO_TK4S_FIRST\")) {\n        if (tkValid) {\n            finalT = tkVal + offsetC;\n            activeSrc = \"TK4S (\" + tkDev + \")\";\n        } else if (pt1Valid) {\n            finalT = ptVal + offsetC;\n            activeSrc = \"FALLBACK_PT100 (\" + pt1Key + \")\";\n        }\n    } else if (tMode.equals(\"AVERAGE_BOTH\")) {\n        if (pt1Valid && pt2Valid) {\n            zMsg.temperature_ch1 = Math.round((ptVal + offsetC) * 10.0) / 10.0;\n            finalT = ((ptVal + pt2Val) / 2.0) + offsetC;\n            activeSrc = \"AVG_PT100 (\" + pt1Key + \"+\" + pt2Key + \")\";\n        } else if (pt1Valid && tkValid) {\n            finalT = ((ptVal + tkVal) / 2.0) + offsetC;\n            activeSrc = \"AVG (PT100+\" + tkDev + \")\";\n        } else if (pt1Valid) {\n            finalT = ptVal + offsetC;\n            activeSrc = \"PT100 (\" + pt1Key + \")\";\n        } else if (tkValid) {\n            finalT = tkVal + offsetC;\n            activeSrc = \"TK4S (\" + tkDev + \")\";\n        }\n    } else {\n        // Default: AUTO_PT100_FIRST\n        if (pt1Valid) {\n            finalT = ptVal + offsetC;\n            activeSrc = \"PT100 (\" + pt1Key + \")\";\n        } else if (tkValid) {\n            finalT = tkVal + offsetC;\n            activeSrc = \"FALLBACK_TK4S (\" + tkDev + \")\";\n        }\n    }\n\n    // Supply pipe temperatures on Z05\n    if (zCode.equals(\"Z05\")) {\n        var sup1 = getVal(\"PT100_CH11_CapNhiet_1\");\n        var sup2 = getVal(\"PT100_CH12_CapNhiet_2\");\n        if (sup1 != null) { zMsg.temp_supply_1 = Double.parseDouble(sup1.toString()); }\n        if (sup2 != null) { zMsg.temp_supply_2 = Double.parseDouble(sup2.toString()); }\n    }\n\n    if (finalT != null) {\n        zMsg.temperature = Math.round(finalT * 10.0) / 10.0;\n        zMsg.temp_source_active = activeSrc;\n        zMsg.quality = \"GOOD\";\n        zMsg.comm_status = \"ONLINE\";\n        zMsg.online = 1;\n        zMsg.errorReason = \"\";\n        touched = true;\n    } else if (isPlcOff) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"OFFLINE\";\n        zMsg.online = 0;\n        zMsg.errorReason = errStr.isEmpty() ? \"PLC_MODBUS_OFFLINE\" : errStr;\n        touched = true;\n    }\n\n    // 2. MULTI-SOURCE MACHINE STATUS RESOLUTION (DI + 3-Phase Power Inference + DO)\n    var machines = zCfg.machines;\n    if (machines != null && machines.size() > 0 && !isPlcOff) {\n        var runCnt = 0;\n        var totCnt = machines.size();\n        for (var j = 0; j < totCnt; j++) {\n            var m = machines[j];\n            var sMode = m.statusMode != null ? m.statusMode.toString() : \"HYBRID_DI_AND_POWER\";\n            var diK = m.diKey != null ? m.diKey.toString() : \"NONE\";\n            var doK = m.doKey != null ? m.doKey.toString() : \"NONE\";\n            var mDev = m.meterDevice != null ? m.meterDevice.toString() : \"NONE\";\n            var ph = m.phase != null ? m.phase.toString() : \"3P_COMBO\";\n            var thrKw = m.runThresholdKw != null ? Double.parseDouble(m.runThresholdKw.toString()) : 0.25;\n\n            var diOn = false;\n            if (!diK.equals(\"NONE\")) {\n                var dv = getVal(diK);\n                if (dv != null) {\n                    var ds = dv.toString().trim().toUpperCase();\n                    diOn = (ds.equals(\"1\") || ds.equals(\"1.0\") || ds.equals(\"TRUE\") || ds.equals(\"ON\"));\n                }\n            }\n            var doOn = false;\n            if (!doK.equals(\"NONE\")) {\n                var dov = getVal(doK);\n                if (dov != null) {\n                    var dos = dov.toString().trim().toUpperCase();\n                    doOn = (dos.equals(\"1\") || dos.equals(\"1.0\") || dos.equals(\"TRUE\") || dos.equals(\"ON\"));\n                }\n            }\n            var pwrOn = false;\n            if (!mDev.equals(\"NONE\")) {\n                var pKey = mDev + \"_P\";\n                if (ph.equals(\"PHASE_A\")) { pKey = mDev + \"_PA\"; }\n                else if (ph.equals(\"PHASE_B\")) { pKey = mDev + \"_PB\"; }\n                else if (ph.equals(\"PHASE_C\")) { pKey = mDev + \"_PC\"; }\n                var pv = getVal(pKey);\n                if (pv != null) {\n                    var pKw = Double.parseDouble(pv.toString());\n                    pwrOn = (pKw >= thrKw);\n                }\n            }\n\n            var isMRun = false;\n            if (sMode.equals(\"DI_ONLY\")) {\n                isMRun = diOn;\n            } else if (sMode.equals(\"POWER_ONLY\")) {\n                isMRun = pwrOn;\n            } else if (sMode.equals(\"DO_FEEDBACK\")) {\n                isMRun = doOn;\n            } else {\n                // HYBRID_DI_AND_POWER\n                isMRun = (!diK.equals(\"NONE\") && diOn) || pwrOn;\n            }\n            if (isMRun) {\n                runCnt = runCnt + 1;\n            }\n        }\n        zMsg.di_running_count = runCnt;\n        zMsg.di_total_count = totCnt;\n        zMsg.di_primary_status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        zMsg.status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        if (zMsg.quality == null) {\n            zMsg.quality = \"GOOD\";\n            zMsg.comm_status = \"ONLINE\";\n            zMsg.online = 1;\n            zMsg.errorReason = \"\";\n        }\n        touched = true;\n    }\n\n    if (touched) {\n        var zMeta = {};\n        foreach (k : metadata.keySet()) {\n            zMeta[k] = metadata[k];\n        }\n        zMeta.targetAssetName = astName;\n        zMeta.deviceName = astName;\n        zMeta.deviceType = \"Onsen_Zone\";\n        outList.add({msg: zMsg, metadata: zMeta, msgType: \"POST_TELEMETRY_REQUEST\"});\n    }\n}\nreturn outList;\n",
+        "tbelScript" : "// 100% Soft-Configured Multi-Source Demultiplexer (Zero Hardcoded Channels)\n// Reads station_io_matrix_json from ONSEN_PLC_MAIN SERVER_SCOPE attribute\nvar isPlcOff = (msg.quality != null && msg.quality.toString().toUpperCase().equals(\"BAD\"));\nvar errStr = msg.errorReason != null ? msg.errorReason.toString() : \"\";\nvar fMask = msg.PT100_FAULT_MASK != null ? Integer.parseInt(msg.PT100_FAULT_MASK.toString()) : 0;\nvar diMask = msg.DI_BITMASK_16 != null ? Integer.parseInt(msg.DI_BITMASK_16.toString()) : -1;\n\nvar matrixRaw = metadata.ss_station_io_matrix_json;\nif (matrixRaw == null || matrixRaw.toString().trim().isEmpty()) {\n    return null;\n}\nvar matrixObj = JSON.parse(matrixRaw.toString());\nvar zonesMap = matrixObj.zones;\nif (zonesMap == null) {\n    return null;\n}\n\n// Helper to read value from msg first, then metadata (latest telemetry on ONSEN_PLC_MAIN)\nfunction getVal(key) {\n    if (key == null || key.equals(\"NONE\") || key.isEmpty()) return null;\n    if (msg[key] != null) return msg[key];\n    if (metadata[key] != null) return metadata[key];\n    return null;\n}\n\nvar outList = [];\nforeach (zEntry : zonesMap.entrySet()) {\n    var zCode = zEntry.getKey();\n    var zCfg = zEntry.getValue();\n    var astName = zCfg.assetName;\n    if (astName == null || astName.toString().isEmpty()) continue;\n\n    var zMsg = {};\n    var touched = false;\n\n    // 1. MULTI-SOURCE TEMPERATURE RESOLUTION (PT100 + TK4S Modbus + Offset + Fallback)\n    var tCfg = zCfg.tempConfig != null ? zCfg.tempConfig : {};\n    var tMode = tCfg.mode != null ? tCfg.mode.toString() : \"AUTO_PT100_FIRST\";\n    var pt1Key = tCfg.pt100Primary != null ? tCfg.pt100Primary.toString() : \"NONE\";\n    var pt2Key = tCfg.pt100Secondary != null ? tCfg.pt100Secondary.toString() : \"NONE\";\n    var tkDev = tCfg.tk4sDevice != null ? tCfg.tk4sDevice.toString() : \"NONE\";\n    var offsetC = tCfg.offsetC != null ? Double.parseDouble(tCfg.offsetC.toString()) : 0.0;\n    var maxDiffC = tCfg.maxDiffWarnC != null ? Double.parseDouble(tCfg.maxDiffWarnC.toString()) : 2.5;\n\n    var rawPt1 = getVal(pt1Key);\n    var rawPt2 = getVal(pt2Key);\n    var rawTkPv = (!tkDev.equals(\"NONE\")) ? getVal(tkDev + \"_PV\") : null;\n    var rawTkSv = (!tkDev.equals(\"NONE\")) ? getVal(tkDev + \"_SV\") : null;\n    var rawTkOk = (!tkDev.equals(\"NONE\")) ? getVal(tkDev + \"_OK\") : null;\n\n    var pt1Valid = (!isPlcOff && rawPt1 != null);\n    var pt2Valid = (!isPlcOff && rawPt2 != null);\n    var tkValid = (rawTkPv != null && (rawTkOk == null || !rawTkOk.toString().equals(\"0\")));\n\n    var ptVal = 0.0;\n    if (pt1Valid) {\n        ptVal = Double.parseDouble(rawPt1.toString());\n        if (ptVal < -50.0 || ptVal > 250.0) { pt1Valid = false; }\n    }\n    var pt2Val = 0.0;\n    if (pt2Valid) {\n        pt2Val = Double.parseDouble(rawPt2.toString());\n        if (pt2Val < -50.0 || pt2Val > 250.0) { pt2Valid = false; }\n    }\n    var tkVal = 0.0;\n    if (tkValid) {\n        tkVal = Double.parseDouble(rawTkPv.toString());\n        if (tkVal < -50.0 || tkVal > 250.0) { tkValid = false; }\n    }\n\n    if (pt1Valid) { zMsg.temp_pt100 = Math.round((ptVal + offsetC) * 10.0) / 10.0; }\n    if (pt2Valid) { zMsg.temperature_ch2 = Math.round((pt2Val + offsetC) * 10.0) / 10.0; }\n    if (tkValid)  { zMsg.temp_tk4s = Math.round(tkVal * 10.0) / 10.0; }\n    if (rawTkSv != null) { zMsg.tk4s_sv = Double.parseDouble(rawTkSv.toString()); }\n\n    if (pt1Valid && tkValid) {\n        var diff = Math.abs((ptVal + offsetC) - tkVal);\n        zMsg.temp_diff = Math.round(diff * 10.0) / 10.0;\n        zMsg.temp_drift_warn = (diff > maxDiffC) ? 1 : 0;\n    }\n\n    var finalT = null;\n    var activeSrc = \"NONE\";\n\n    if (tMode.equals(\"PT100_ONLY\")) {\n        if (pt1Valid) { finalT = ptVal + offsetC; activeSrc = \"PT100 (\" + pt1Key + \")\"; }\n    } else if (tMode.equals(\"TK4S_ONLY\")) {\n        if (tkValid) { finalT = tkVal + offsetC; activeSrc = \"TK4S (\" + tkDev + \")\"; }\n    } else if (tMode.equals(\"AUTO_TK4S_FIRST\")) {\n        if (tkValid) {\n            finalT = tkVal + offsetC;\n            activeSrc = \"TK4S (\" + tkDev + \")\";\n        } else if (pt1Valid) {\n            finalT = ptVal + offsetC;\n            activeSrc = \"FALLBACK_PT100 (\" + pt1Key + \")\";\n        }\n    } else if (tMode.equals(\"AVERAGE_BOTH\")) {\n        if (pt1Valid && pt2Valid) {\n            zMsg.temperature_ch1 = Math.round((ptVal + offsetC) * 10.0) / 10.0;\n            finalT = ((ptVal + pt2Val) / 2.0) + offsetC;\n            activeSrc = \"AVG_PT100 (\" + pt1Key + \"+\" + pt2Key + \")\";\n        } else if (pt1Valid && tkValid) {\n            finalT = ((ptVal + tkVal) / 2.0) + offsetC;\n            activeSrc = \"AVG (PT100+\" + tkDev + \")\";\n        } else if (pt1Valid) {\n            finalT = ptVal + offsetC;\n            activeSrc = \"PT100 (\" + pt1Key + \")\";\n        } else if (tkValid) {\n            finalT = tkVal + offsetC;\n            activeSrc = \"TK4S (\" + tkDev + \")\";\n        }\n    } else {\n        // Default: AUTO_PT100_FIRST\n        if (pt1Valid) {\n            finalT = ptVal + offsetC;\n            activeSrc = \"PT100 (\" + pt1Key + \")\";\n        } else if (tkValid) {\n            finalT = tkVal + offsetC;\n            activeSrc = \"FALLBACK_TK4S (\" + tkDev + \")\";\n        }\n    }\n\n    // Supply pipe temperatures on Z05\n    if (zCode.equals(\"Z05\")) {\n        var sup1 = getVal(\"PT100_CH11_CapNhiet_1\");\n        var sup2 = getVal(\"PT100_CH12_CapNhiet_2\");\n        if (sup1 != null) { zMsg.temp_supply_1 = Double.parseDouble(sup1.toString()); }\n        if (sup2 != null) { zMsg.temp_supply_2 = Double.parseDouble(sup2.toString()); }\n    }\n\n    if (finalT != null) {\n        zMsg.temperature = Math.round(finalT * 10.0) / 10.0;\n        zMsg.temp_source_active = activeSrc;\n        zMsg.quality = \"GOOD\";\n        zMsg.comm_status = \"ONLINE\";\n        zMsg.online = 1;\n        zMsg.errorReason = \"\";\n        touched = true;\n    } else if (isPlcOff) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"OFFLINE\";\n        zMsg.online = 0;\n        zMsg.errorReason = errStr.isEmpty() ? \"PLC_MODBUS_OFFLINE\" : errStr;\n        touched = true;\n    }\n\n    // 2. MULTI-SOURCE MACHINE STATUS RESOLUTION (DI + 3-Phase Power Inference + DO)\n    var machines = zCfg.machines;\n    if (machines != null && machines.size() > 0 && !isPlcOff) {\n        var runCnt = 0;\n        var totCnt = machines.size();\n        for (var j = 0; j < totCnt; j++) {\n            var m = machines[j];\n            var sMode = m.statusMode != null ? m.statusMode.toString() : \"HYBRID_DI_AND_POWER\";\n            var diK = m.diKey != null ? m.diKey.toString() : \"NONE\";\n            var doK = m.doKey != null ? m.doKey.toString() : \"NONE\";\n            var mDev = m.meterDevice != null ? m.meterDevice.toString() : \"NONE\";\n            var ph = m.phase != null ? m.phase.toString() : \"3P_COMBO\";\n            var thrKw = m.runThresholdKw != null ? Double.parseDouble(m.runThresholdKw.toString()) : 0.25;\n\n            var diOn = false;\n            if (!diK.equals(\"NONE\")) {\n                var dv = getVal(diK);\n                if (dv != null) {\n                    var ds = dv.toString().trim().toUpperCase();\n                    diOn = (ds.equals(\"1\") || ds.equals(\"1.0\") || ds.equals(\"TRUE\") || ds.equals(\"ON\"));\n                }\n            }\n            var doOn = false;\n            if (!doK.equals(\"NONE\")) {\n                var dov = getVal(doK);\n                if (dov != null) {\n                    var dos = dov.toString().trim().toUpperCase();\n                    doOn = (dos.equals(\"1\") || dos.equals(\"1.0\") || dos.equals(\"TRUE\") || dos.equals(\"ON\"));\n                }\n            }\n            var pwrOn = false;\n            if (!mDev.equals(\"NONE\")) {\n                var pKey = mDev + \"_P\";\n                if (ph.equals(\"PHASE_A\")) { pKey = mDev + \"_PA\"; }\n                else if (ph.equals(\"PHASE_B\")) { pKey = mDev + \"_PB\"; }\n                else if (ph.equals(\"PHASE_C\")) { pKey = mDev + \"_PC\"; }\n                var pv = getVal(pKey);\n                if (pv != null) {\n                    var pKw = Double.parseDouble(pv.toString());\n                    pwrOn = (pKw >= thrKw);\n                }\n            }\n\n            var isMRun = false;\n            if (sMode.equals(\"DI_ONLY\")) {\n                isMRun = diOn;\n            } else if (sMode.equals(\"POWER_ONLY\")) {\n                isMRun = pwrOn;\n            } else if (sMode.equals(\"DO_FEEDBACK\")) {\n                isMRun = doOn;\n            } else {\n                // HYBRID_DI_AND_POWER\n                isMRun = (!diK.equals(\"NONE\") && diOn) || pwrOn;\n            }\n            if (isMRun) {\n                runCnt = runCnt + 1;\n            }\n        }\n        zMsg.di_running_count = runCnt;\n        zMsg.di_total_count = totCnt;\n        zMsg.di_primary_status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        zMsg.status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        if (zMsg.quality == null) {\n            zMsg.quality = \"GOOD\";\n            zMsg.comm_status = \"ONLINE\";\n            zMsg.online = 1;\n            zMsg.errorReason = \"\";\n        }\n        touched = true;\n    }\n\n    if (touched) {\n        var zMeta = {};\n        foreach (k : metadata.keySet()) {\n            zMeta[k] = metadata[k];\n        }\n        zMeta.targetAssetName = astName;\n        zMeta.deviceName = astName;\n        zMeta.deviceType = \"Onsen_Zone\";\n        outList.add({msg: zMsg, metadata: zMeta, msgType: \"POST_TELEMETRY_REQUEST\"});\n    }\n}\nreturn outList;\n"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -875,24 +903,32 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "ebed19c1-d678-11f1-a6d9-970576ca9a33"
+        "id" : "e1c13360-d67c-11f1-a6d9-970576ca9a33"
       },
-      "name" : "AI_07B Tách Tín Hiệu PT100 & DI Từ PLC Sang 9 Khu Vực (AST_*)",
+      "name" : "AI_07B: Bộ Phân Tách Đa Nguồn Mềm -> 9 Khu Vực (Soft Demux)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
     }, {
       "additionalInfo" : {
-        "description" : "Chuyển thực thể nhận dữ liệu sang AST_COLD_POOL_28 .. AST_SNOW_ROOM",
-        "layoutX" : 1120,
-        "layoutY" : 260
+        "layoutX" : 1240,
+        "layoutY" : 960,
+        "description" : "Switch originator to target Zone Asset"
       },
       "configuration" : {
         "originatorSource" : "ENTITY",
         "entityType" : "ASSET",
         "entityNamePattern" : "${targetAssetName}",
-        "relationsQuery" : null
+        "relationsQuery" : {
+          "direction" : "FROM",
+          "maxLevel" : 1,
+          "filters" : [ {
+            "relationType" : "Contains",
+            "entityTypes" : [ ]
+          } ],
+          "fetchLastLevelOnly" : false
+        }
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -900,23 +936,51 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "ebed40d0-d678-11f1-a6d9-970576ca9a33"
+        "id" : "e1c13361-d67c-11f1-a6d9-970576ca9a33"
       },
-      "name" : "AI_07C Đổi Originator Sang Zone Asset (${targetAssetName})",
+      "name" : "AI_07C: Đổi Originator Sang Asset Khu Vực (AST_*)",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode"
     }, {
       "additionalInfo" : {
-        "description" : "Định tuyến nhiệt độ và trạng thái của từng Zone Asset",
-        "layoutX" : 1400,
-        "layoutY" : 260
+        "layoutX" : 1520,
+        "layoutY" : 960,
+        "description" : "Inject 4 alarm thresholds from Zone Asset SERVER_SCOPE into msg"
+      },
+      "configuration" : {
+        "tellFailureIfAbsent" : false,
+        "fetchTo" : "DATA",
+        "clientAttributeNames" : [ ],
+        "sharedAttributeNames" : [ ],
+        "serverAttributeNames" : [ "alarm_LL", "alarm_L", "alarm_H", "alarm_HH", "zoneCode", "zoneTitle" ],
+        "latestTsKeyNames" : [ ],
+        "getLatestValueWithTs" : false
+      },
+      "configurationVersion" : 1,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "e1c15a70-d67c-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_07D: Lấy Ngưỡng LL/L/H/HH Của Asset Khu Vực",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.metadata.TbGetAttributesNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 620,
+        "layoutY" : 1060,
+        "description" : "Mirror TK4S PV/SV and ADL400 Power to ONSEN_PLC_MAIN latest"
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "// Route demultiplexed Zone Asset message\nvar qStr = msg.quality != null ? msg.quality.toString().toUpperCase() : \"\";\nif (qStr.equals(\"BAD\")) {\n    if (msg.comm_status != null && msg.comm_status.toString().equals(\"SENSOR_FAULT\")) {\n        return [\"Zone_Status_Route\", \"Sensor_Spike_Fault\"];\n    }\n    return [\"Comm_Fault_Route\"];\n}\n\nvar routes = [\"Zone_Status_Route\", \"Comm_Restored_Route\"];\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Zone_Status_Route\", \"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Zone_Temp_TS_Route\");\n    routes.add(\"Temp_Route\");\n}\nreturn routes;\n",
-        "tbelScript" : "// Route demultiplexed Zone Asset message\nvar qStr = msg.quality != null ? msg.quality.toString().toUpperCase() : \"\";\nif (qStr.equals(\"BAD\")) {\n    if (msg.comm_status != null && msg.comm_status.toString().equals(\"SENSOR_FAULT\")) {\n        return [\"Zone_Status_Route\", \"Sensor_Spike_Fault\"];\n    }\n    return [\"Comm_Fault_Route\"];\n}\n\nvar routes = [\"Zone_Status_Route\", \"Comm_Restored_Route\"];\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Zone_Status_Route\", \"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Zone_Temp_TS_Route\");\n    routes.add(\"Temp_Route\");\n}\nreturn routes;\n"
+        "jsScript" : "var devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\nvar out = {};\nvar hasData = false;\n\nif (devType.equals(\"TK4S_Controller\") || devName.startsWith(\"ONSEN_TK4S_\")) {\n    if (msg.PV_Temp != null) { out[devName + \"_PV\"] = msg.PV_Temp; hasData = true; }\n    if (msg.SV_Read != null) { out[devName + \"_SV\"] = msg.SV_Read; hasData = true; }\n    if (msg.MV1_Heat != null) { out[devName + \"_MV1\"] = msg.MV1_Heat; hasData = true; }\n    if (msg.MV2_Cool != null) { out[devName + \"_MV2\"] = msg.MV2_Cool; hasData = true; }\n    out[devName + \"_OK\"] = (msg.quality != null && msg.quality.toString().equals(\"BAD\")) ? 0 : 1;\n    hasData = true;\n} else if (devType.equals(\"Power_Meter\") || devName.startsWith(\"ONSEN_ADL400_\")) {\n    var pTot = msg.p_total != null ? msg.p_total : msg.Power_Active_Total;\n    var pA = msg.p_a != null ? msg.p_a : msg.Power_Active_A;\n    var pB = msg.p_b != null ? msg.p_b : msg.Power_Active_B;\n    var pC = msg.p_c != null ? msg.p_c : msg.Power_Active_C;\n    if (pTot != null) { out[devName + \"_P\"] = pTot; hasData = true; }\n    if (pA != null) { out[devName + \"_PA\"] = pA; hasData = true; }\n    if (pB != null) { out[devName + \"_PB\"] = pB; hasData = true; }\n    if (pC != null) { out[devName + \"_PC\"] = pC; hasData = true; }\n    out[devName + \"_OK\"] = (msg.quality != null && msg.quality.toString().equals(\"BAD\")) ? 0 : 1;\n}\n\nif (!hasData) {\n    return null;\n}\nvar mMeta = {};\nforeach (k : metadata.keySet()) {\n    mMeta[k] = metadata[k];\n}\nmMeta.plcMainName = \"ONSEN_PLC_MAIN\";\nreturn {msg: out, metadata: mMeta, msgType: \"POST_TELEMETRY_REQUEST\"};\n",
+        "tbelScript" : "var devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\nvar out = {};\nvar hasData = false;\n\nif (devType.equals(\"TK4S_Controller\") || devName.startsWith(\"ONSEN_TK4S_\")) {\n    if (msg.PV_Temp != null) { out[devName + \"_PV\"] = msg.PV_Temp; hasData = true; }\n    if (msg.SV_Read != null) { out[devName + \"_SV\"] = msg.SV_Read; hasData = true; }\n    if (msg.MV1_Heat != null) { out[devName + \"_MV1\"] = msg.MV1_Heat; hasData = true; }\n    if (msg.MV2_Cool != null) { out[devName + \"_MV2\"] = msg.MV2_Cool; hasData = true; }\n    out[devName + \"_OK\"] = (msg.quality != null && msg.quality.toString().equals(\"BAD\")) ? 0 : 1;\n    hasData = true;\n} else if (devType.equals(\"Power_Meter\") || devName.startsWith(\"ONSEN_ADL400_\")) {\n    var pTot = msg.p_total != null ? msg.p_total : msg.Power_Active_Total;\n    var pA = msg.p_a != null ? msg.p_a : msg.Power_Active_A;\n    var pB = msg.p_b != null ? msg.p_b : msg.Power_Active_B;\n    var pC = msg.p_c != null ? msg.p_c : msg.Power_Active_C;\n    if (pTot != null) { out[devName + \"_P\"] = pTot; hasData = true; }\n    if (pA != null) { out[devName + \"_PA\"] = pA; hasData = true; }\n    if (pB != null) { out[devName + \"_PB\"] = pB; hasData = true; }\n    if (pC != null) { out[devName + \"_PC\"] = pC; hasData = true; }\n    out[devName + \"_OK\"] = (msg.quality != null && msg.quality.toString().equals(\"BAD\")) ? 0 : 1;\n}\n\nif (!hasData) {\n    return null;\n}\nvar mMeta = {};\nforeach (k : metadata.keySet()) {\n    mMeta[k] = metadata[k];\n}\nmMeta.plcMainName = \"ONSEN_PLC_MAIN\";\nreturn {msg: out, metadata: mMeta, msgType: \"POST_TELEMETRY_REQUEST\"};\n"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -924,13 +988,46 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "ebed40d1-d678-11f1-a6d9-970576ca9a33"
+        "id" : "e1c15a71-d67c-11f1-a6d9-970576ca9a33"
       },
-      "name" : "AI_07D Phân Luồng Nhiệt Độ & Cảnh Báo Khu Vực (Zone Router)",
+      "name" : "AI_08A: Chuẩn Hóa TK4S & Công Suất ADL400 Về Bộ Tập Trung",
       "queueName" : null,
       "ruleChainId" : null,
       "singletonMode" : false,
-      "type" : "org.thingsboard.rule.engine.filter.TbJsSwitchNode"
+      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
+    }, {
+      "additionalInfo" : {
+        "layoutX" : 940,
+        "layoutY" : 1060,
+        "description" : "Route slave mirror values to ONSEN_PLC_MAIN"
+      },
+      "configuration" : {
+        "originatorSource" : "ENTITY",
+        "entityType" : "DEVICE",
+        "entityNamePattern" : "${plcMainName}",
+        "relationsQuery" : {
+          "direction" : "FROM",
+          "maxLevel" : 1,
+          "filters" : [ {
+            "relationType" : "Contains",
+            "entityTypes" : [ ]
+          } ],
+          "fetchLastLevelOnly" : false
+        }
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "e1c15a72-d67c-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_08B: Đổi Originator Về ONSEN_PLC_MAIN",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode"
     } ],
     "ruleChainConnections" : null
   },
@@ -959,7 +1056,7 @@
     },
     "type" : "Uses",
     "typeGroup" : "COMMON",
-    "version" : 4427
+    "version" : 4570
   } ],
   "attributes" : {
     "SERVER_SCOPE" : [ ]
