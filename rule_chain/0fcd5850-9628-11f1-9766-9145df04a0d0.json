@@ -395,8 +395,8 @@
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "// 1. Clean foreign keys if any\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\n\nvar routes = [\"Valid_Telemetry\"];\n\n// 2. PT100 Temperature Spike & Open/Short Circuit Hardware Guard\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        // Block corrupted hardware spike (-200C or +850C) from polluting ts_kv database!\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 3. Power Meter Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 4. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;",
-        "tbelScript" : "// 1. Clean foreign keys if any\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\n\nvar routes = [\"Valid_Telemetry\"];\n\n// 2. PT100 Temperature Spike & Open/Short Circuit Hardware Guard\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        // Block corrupted hardware spike (-200C or +850C) from polluting ts_kv database!\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 3. Power Meter Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 4. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;"
+        "jsScript" : "// 1. Clean foreign keys if any\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\n\nvar routes = [\"Valid_Telemetry\"];\n\n// 2. PT100 Temperature Spike & Open/Short Circuit Hardware Guard\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 3. Power Meter Energy & TOU Route (includes Live Edge Fallback when hardware Modbus is offline)\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null || metadata.deviceType == \"Power_Meter\") {\n    routes.add(\"Energy_Route\");\n}\n\n// 4. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;",
+        "tbelScript" : "// 1. Clean foreign keys if any\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\n\nvar routes = [\"Valid_Telemetry\"];\n\n// 2. PT100 Temperature Spike & Open/Short Circuit Hardware Guard\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 3. Power Meter Energy & TOU Route (includes Live Edge Fallback when hardware Modbus is offline)\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null || metadata.deviceType == \"Power_Meter\") {\n    routes.add(\"Energy_Route\");\n}\n\n// 4. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -666,7 +666,7 @@
     },
     "type" : "Uses",
     "typeGroup" : "COMMON",
-    "version" : 2816
+    "version" : 2898
   } ],
   "attributes" : {
     "SERVER_SCOPE" : [ ]
