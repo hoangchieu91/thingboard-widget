@@ -43,6 +43,10 @@
       "toIndex" : 19,
       "type" : "Activity Event"
     }, {
+      "fromIndex" : 2,
+      "toIndex" : 23,
+      "type" : "Post telemetry"
+    }, {
       "fromIndex" : 6,
       "toIndex" : 2,
       "type" : "Success"
@@ -827,7 +831,7 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "e1c10c50-d67c-11f1-a6d9-970576ca9a33"
+        "id" : "25960200-d67d-11f1-a6d9-970576ca9a33"
       },
       "name" : "AI_00: Chuẩn Hóa Gói Tin & Lọc Rác (Pre-Normalizer)",
       "queueName" : null,
@@ -851,7 +855,7 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "e1c10c51-d67c-11f1-a6d9-970576ca9a33"
+        "id" : "25960201-d67d-11f1-a6d9-970576ca9a33"
       },
       "name" : "AI_07A: Lọc Biến Đếm 2s Khỏi Lịch Sử PLC (Zero ts_kv Bloat)",
       "queueName" : null,
@@ -879,7 +883,7 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "e1c10c52-d67c-11f1-a6d9-970576ca9a33"
+        "id" : "25960202-d67d-11f1-a6d9-970576ca9a33"
       },
       "name" : "AI_07_ATTR: Nạp Ma Trận Đấu Nối Mềm Đa Nguồn (station_io_matrix_json)",
       "queueName" : null,
@@ -899,15 +903,11 @@
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1793597679008,
-        "failuresEnabled" : true
-      },
+      "debugSettings" : null,
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "e1c13360-d67c-11f1-a6d9-970576ca9a33"
+        "id" : "25960203-d67d-11f1-a6d9-970576ca9a33"
       },
       "name" : "AI_07B: Bộ Phân Tách Đa Nguồn Mềm -> 9 Khu Vực (Soft Demux)",
       "queueName" : null,
@@ -940,7 +940,7 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "e1c13361-d67c-11f1-a6d9-970576ca9a33"
+        "id" : "25962910-d67d-11f1-a6d9-970576ca9a33"
       },
       "name" : "AI_07C: Đổi Originator Sang Asset Khu Vực (AST_*)",
       "queueName" : null,
@@ -968,7 +968,7 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "e1c15a70-d67c-11f1-a6d9-970576ca9a33"
+        "id" : "25962911-d67d-11f1-a6d9-970576ca9a33"
       },
       "name" : "AI_07D: Lấy Ngưỡng LL/L/H/HH Của Asset Khu Vực",
       "queueName" : null,
@@ -988,15 +988,11 @@
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
-      "debugSettings" : {
-        "allEnabled" : false,
-        "allEnabledUntil" : 1793597679008,
-        "failuresEnabled" : true
-      },
+      "debugSettings" : null,
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "e1c15a71-d67c-11f1-a6d9-970576ca9a33"
+        "id" : "25962912-d67d-11f1-a6d9-970576ca9a33"
       },
       "name" : "AI_08A: Chuẩn Hóa TK4S & Công Suất ADL400 Về Bộ Tập Trung",
       "queueName" : null,
@@ -1029,7 +1025,7 @@
       "externalId" : null,
       "id" : {
         "entityType" : "RULE_NODE",
-        "id" : "e1c15a72-d67c-11f1-a6d9-970576ca9a33"
+        "id" : "25965020-d67d-11f1-a6d9-970576ca9a33"
       },
       "name" : "AI_08B: Đổi Originator Về ONSEN_PLC_MAIN",
       "queueName" : null,
@@ -1064,7 +1060,7 @@
     },
     "type" : "Uses",
     "typeGroup" : "COMMON",
-    "version" : 4716
+    "version" : 4862
   } ],
   "attributes" : {
     "SERVER_SCOPE" : [ ]
