@@ -56,11 +56,11 @@
       "type" : "Success"
     }, {
       "fromIndex" : 9,
-      "toIndex" : 10,
+      "toIndex" : 16,
       "type" : "Success"
     }, {
       "fromIndex" : 9,
-      "toIndex" : 16,
+      "toIndex" : 21,
       "type" : "Success"
     }, {
       "fromIndex" : 9,
@@ -95,16 +95,28 @@
       "toIndex" : 20,
       "type" : "Sensor_Spike_Fault"
     }, {
+      "fromIndex" : 11,
+      "toIndex" : 21,
+      "type" : "PLC_Latest_Route"
+    }, {
+      "fromIndex" : 11,
+      "toIndex" : 23,
+      "type" : "PLC_Clean_TS_Route"
+    }, {
+      "fromIndex" : 11,
+      "toIndex" : 24,
+      "type" : "PLC_Demux_Route"
+    }, {
       "fromIndex" : 13,
       "toIndex" : 14,
       "type" : "Success"
     }, {
       "fromIndex" : 14,
-      "toIndex" : 15,
+      "toIndex" : 16,
       "type" : "Success"
     }, {
       "fromIndex" : 14,
-      "toIndex" : 16,
+      "toIndex" : 21,
       "type" : "Success"
     }, {
       "fromIndex" : 16,
@@ -126,6 +138,46 @@
       "fromIndex" : 22,
       "toIndex" : 0,
       "type" : "Success"
+    }, {
+      "fromIndex" : 23,
+      "toIndex" : 0,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 24,
+      "toIndex" : 25,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 25,
+      "toIndex" : 26,
+      "type" : "Success"
+    }, {
+      "fromIndex" : 26,
+      "toIndex" : 0,
+      "type" : "Zone_Temp_TS_Route"
+    }, {
+      "fromIndex" : 26,
+      "toIndex" : 7,
+      "type" : "Temp_Route"
+    }, {
+      "fromIndex" : 26,
+      "toIndex" : 16,
+      "type" : "Zone_Status_Route"
+    }, {
+      "fromIndex" : 26,
+      "toIndex" : 17,
+      "type" : "Comm_Fault_Route"
+    }, {
+      "fromIndex" : 26,
+      "toIndex" : 19,
+      "type" : "Comm_Restored_Route"
+    }, {
+      "fromIndex" : 26,
+      "toIndex" : 20,
+      "type" : "Sensor_Spike_Fault"
+    }, {
+      "fromIndex" : 26,
+      "toIndex" : 21,
+      "type" : "Zone_Status_Route"
     } ],
     "firstNodeIndex" : 6,
     "nodes" : [ {
@@ -422,8 +474,8 @@
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "// 1. Strip foreign & bloat keys (sourceTs is redundant with metadata.ts and causes ts_kv bloat)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hasProcessData = (msg.temperature != null || msg.kwh != null || msg.kWh != null || msg.p_total != null || msg.status != null || msg.run != null);\n\n// 2. Detect Gateway / Modbus / PLC Communication Failure (quality == BAD or error frame without process data)\nif (qStr.equals(\"BAD\") || (!errStr.isEmpty() && !hasProcessData)) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (metadata.deviceType != null && metadata.deviceType.toString().equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    return faultRoutes;\n}\n\n// 3. Valid Telemetry received -> mark ONLINE & clear any active communication fault alarm\nmsg.quality = \"GOOD\";\nmsg.comm_status = \"ONLINE\";\nmsg.errorReason = \"\";\nmsg.last_good_ts = tsMs;\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\n\n// 4. PT100 Temperature Spike & Open/Short Circuit Hardware Guard (-45°C .. +160°C)\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 5. Power Meter Real Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 6. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;",
-        "tbelScript" : "// 1. Strip foreign & bloat keys (sourceTs is redundant with metadata.ts and causes ts_kv bloat)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hasProcessData = (msg.temperature != null || msg.kwh != null || msg.kWh != null || msg.p_total != null || msg.status != null || msg.run != null);\n\n// 2. Detect Gateway / Modbus / PLC Communication Failure (quality == BAD or error frame without process data)\nif (qStr.equals(\"BAD\") || (!errStr.isEmpty() && !hasProcessData)) {\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (metadata.deviceType != null && metadata.deviceType.toString().equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    return faultRoutes;\n}\n\n// 3. Valid Telemetry received -> mark ONLINE & clear any active communication fault alarm\nmsg.quality = \"GOOD\";\nmsg.comm_status = \"ONLINE\";\nmsg.errorReason = \"\";\nmsg.last_good_ts = tsMs;\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\n\n// 4. PT100 Temperature Spike & Open/Short Circuit Hardware Guard (-45°C .. +160°C)\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Temp_Route\");\n}\n\n// 5. Power Meter Real Energy & TOU Route\nif (msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\n// 6. Contactor Runtime & Maintenance Route\nif (msg.status != null || msg.run != null) {\n    routes.add(\"Contactor_Route\");\n}\n\nreturn routes;"
+        "jsScript" : "// 1. Strip foreign & bloat keys (sourceTs is redundant with metadata.ts and causes ts_kv bloat)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\n\n// Ignore any non-Onsen legacy devices if they ever appear\nif (devName.startsWith(\"54A_\")) {\n    return [];\n}\n\n// Strip PLC_Heartbeat from slave devices (TK4S & ADL400) so it does not write 19x every 2s into ts_kv\nif (!devName.equals(\"ONSEN_PLC_MAIN\")) {\n    msg.remove(\"PLC_Heartbeat\");\n}\n\n// Normalize 3-phase power keys on Acrel ADL400 meters for Dashboard compatibility\nif (msg.Power_Active_A != null && msg.p_a == null) { msg.p_a = msg.Power_Active_A; }\nif (msg.Power_Active_B != null && msg.p_b == null) { msg.p_b = msg.Power_Active_B; }\nif (msg.Power_Active_C != null && msg.p_c == null) { msg.p_c = msg.Power_Active_C; }\nif (msg.v_a != null && msg.u_a == null) { msg.u_a = msg.v_a; }\nif (msg.v_b != null && msg.u_b == null) { msg.u_b = msg.v_b; }\nif (msg.v_c != null && msg.u_c == null) { msg.u_c = msg.v_c; }\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hcStr = msg.health_chain_code != null ? msg.health_chain_code.toString().trim() : \"\";\nif (errStr.isEmpty() && !hcStr.isEmpty() && !hcStr.equals(\"OK\")) {\n    errStr = hcStr;\n}\n\nvar isChainBad = false;\nif (msg.gw_tcp_ok != null && (msg.gw_tcp_ok.toString().equals(\"0\") || msg.gw_tcp_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.plc_run_ok != null && (msg.plc_run_ok.toString().equals(\"0\") || msg.plc_run_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.rs485_comm_ok != null && (msg.rs485_comm_ok.toString().equals(\"0\") || msg.rs485_comm_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.Comm_OK != null && (msg.Comm_OK.toString().equals(\"0\") || msg.Comm_OK.toString().equals(\"false\"))) { isChainBad = true; }\n\n// 2. Detect Gateway / Modbus / PLC Communication Failure\nif (qStr.equals(\"BAD\") || isChainBad) {\n    msg.quality = \"BAD\";\n    msg.comm_status = \"OFFLINE\";\n    msg.online = 0;\n    if (errStr.isEmpty()) {\n        errStr = \"MODBUS_PLC_OFFLINE\";\n    }\n    msg.errorReason = errStr;\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (devType.equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    if (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n        faultRoutes.add(\"PLC_Demux_Route\");\n    }\n    return faultRoutes;\n}\n\n// 3. Valid Telemetry received -> mark ONLINE & clear any active communication fault alarm\nmsg.quality = \"GOOD\";\nmsg.comm_status = \"ONLINE\";\nmsg.online = 1;\nmsg.errorReason = \"\";\nmsg.last_good_ts = tsMs;\n\n// 4. Special routing for ONSEN_PLC_MAIN (12 PT100 + 16 DI + 16 DO + Diagnostics)\nif (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n    return [\"PLC_Latest_Route\", \"PLC_Clean_TS_Route\", \"Comm_Restored_Route\", \"Contactor_Route\", \"PLC_Demux_Route\"];\n}\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\n\n// 5. Power Meter Real Energy & TOU Route\nif (devType.equals(\"Power_Meter\") || msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\nreturn routes;\n",
+        "tbelScript" : "// 1. Strip foreign & bloat keys (sourceTs is redundant with metadata.ts and causes ts_kv bloat)\nmsg.remove(\"m3Air\");\nmsg.remove(\"m3LPG\");\nmsg.remove(\"delta_CO2\");\nmsg.remove(\"sourceTs\");\nmsg.remove(\"source_ts\");\n\nvar devName = metadata.deviceName != null ? metadata.deviceName.toString() : \"\";\nvar devType = metadata.deviceType != null ? metadata.deviceType.toString() : \"\";\n\n// Ignore any non-Onsen legacy devices if they ever appear\nif (devName.startsWith(\"54A_\")) {\n    return [];\n}\n\n// Strip PLC_Heartbeat from slave devices (TK4S & ADL400) so it does not write 19x every 2s into ts_kv\nif (!devName.equals(\"ONSEN_PLC_MAIN\")) {\n    msg.remove(\"PLC_Heartbeat\");\n}\n\n// Normalize 3-phase power keys on Acrel ADL400 meters for Dashboard compatibility\nif (msg.Power_Active_A != null && msg.p_a == null) { msg.p_a = msg.Power_Active_A; }\nif (msg.Power_Active_B != null && msg.p_b == null) { msg.p_b = msg.Power_Active_B; }\nif (msg.Power_Active_C != null && msg.p_c == null) { msg.p_c = msg.Power_Active_C; }\nif (msg.v_a != null && msg.u_a == null) { msg.u_a = msg.v_a; }\nif (msg.v_b != null && msg.u_b == null) { msg.u_b = msg.v_b; }\nif (msg.v_c != null && msg.u_c == null) { msg.u_c = msg.v_c; }\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar qStr = msg.quality != null ? msg.quality.toString().trim().toUpperCase() : \"\";\nvar errStr = msg.errorReason != null ? msg.errorReason.toString().trim() : \"\";\nvar hcStr = msg.health_chain_code != null ? msg.health_chain_code.toString().trim() : \"\";\nif (errStr.isEmpty() && !hcStr.isEmpty() && !hcStr.equals(\"OK\")) {\n    errStr = hcStr;\n}\n\nvar isChainBad = false;\nif (msg.gw_tcp_ok != null && (msg.gw_tcp_ok.toString().equals(\"0\") || msg.gw_tcp_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.plc_run_ok != null && (msg.plc_run_ok.toString().equals(\"0\") || msg.plc_run_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.rs485_comm_ok != null && (msg.rs485_comm_ok.toString().equals(\"0\") || msg.rs485_comm_ok.toString().equals(\"false\"))) { isChainBad = true; }\nif (msg.Comm_OK != null && (msg.Comm_OK.toString().equals(\"0\") || msg.Comm_OK.toString().equals(\"false\"))) { isChainBad = true; }\n\n// 2. Detect Gateway / Modbus / PLC Communication Failure\nif (qStr.equals(\"BAD\") || isChainBad) {\n    msg.quality = \"BAD\";\n    msg.comm_status = \"OFFLINE\";\n    msg.online = 0;\n    if (errStr.isEmpty()) {\n        errStr = \"MODBUS_PLC_OFFLINE\";\n    }\n    msg.errorReason = errStr;\n    var faultRoutes = [\"Comm_Fault_Route\"];\n    if (devType.equals(\"Power_Meter\")) {\n        faultRoutes.add(\"Energy_Route\");\n    }\n    if (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n        faultRoutes.add(\"PLC_Demux_Route\");\n    }\n    return faultRoutes;\n}\n\n// 3. Valid Telemetry received -> mark ONLINE & clear any active communication fault alarm\nmsg.quality = \"GOOD\";\nmsg.comm_status = \"ONLINE\";\nmsg.online = 1;\nmsg.errorReason = \"\";\nmsg.last_good_ts = tsMs;\n\n// 4. Special routing for ONSEN_PLC_MAIN (12 PT100 + 16 DI + 16 DO + Diagnostics)\nif (devName.equals(\"ONSEN_PLC_MAIN\") || devType.equals(\"PLC_Coordinator\")) {\n    return [\"PLC_Latest_Route\", \"PLC_Clean_TS_Route\", \"Comm_Restored_Route\", \"Contactor_Route\", \"PLC_Demux_Route\"];\n}\n\nvar routes = [\"Valid_Telemetry\", \"Comm_Restored_Route\"];\n\n// 5. Power Meter Real Energy & TOU Route\nif (devType.equals(\"Power_Meter\") || msg.kwh != null || msg.kWh != null || msg.p_total != null) {\n    routes.add(\"Energy_Route\");\n}\n\nreturn routes;\n"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -475,7 +527,7 @@
         "fetchTo" : "METADATA",
         "clientAttributeNames" : [ ],
         "sharedAttributeNames" : [ ],
-        "serverAttributeNames" : [ "last_run_ts", "last_status", "last_state_change_ts", "start_count_total", "stop_count_total", "runtime_lifetime_hours", "runtime_hours_total", "continuous_run_hours", "maintenance_limit_hours", "last_maintenance_date", "maintenance_reset_count" ],
+        "serverAttributeNames" : [ "di_runtime_map_json", "last_plc_di_ts", "last_di_bitmask" ],
         "latestTsKeyNames" : [ ],
         "getLatestValueWithTs" : false
       },
@@ -499,8 +551,8 @@
       },
       "configuration" : {
         "scriptLang" : "TBEL",
-        "jsScript" : "var statusStr = msg.status != null ? msg.status.toString().trim().toUpperCase() : \"\";\nvar isRun = (statusStr == \"RUNNING\" || statusStr == \"ON\" || statusStr == \"1\" || statusStr == \"1.0\" || statusStr == \"TRUE\" || msg.run == 1 || msg.run == true);\nvar curStInt = isRun ? 1 : 0;\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar lastTs = metadata.ss_last_run_ts != null ? Long.parseLong(metadata.ss_last_run_ts.toString()) : tsMs;\nvar lastChangeTs = metadata.ss_last_state_change_ts != null ? Long.parseLong(metadata.ss_last_state_change_ts.toString()) : lastTs;\nvar prevStInt = metadata.ss_last_status != null ? Integer.parseInt(metadata.ss_last_status.toString()) : curStInt;\n\nvar lifeHrs = metadata.ss_runtime_lifetime_hours != null ? Double.parseDouble(metadata.ss_runtime_lifetime_hours.toString()) : 0.0;\nvar cycleHrs = metadata.ss_runtime_hours_total != null ? Double.parseDouble(metadata.ss_runtime_hours_total.toString()) : 0.0;\nvar contHrs = metadata.ss_continuous_run_hours != null ? Double.parseDouble(metadata.ss_continuous_run_hours.toString()) : 0.0;\nvar maintLimit = metadata.ss_maintenance_limit_hours != null ? Double.parseDouble(metadata.ss_maintenance_limit_hours.toString()) : 1000.0;\nvar startCnt = metadata.ss_start_count_total != null ? Integer.parseInt(metadata.ss_start_count_total.toString()) : 0;\nvar stopCnt = metadata.ss_stop_count_total != null ? Integer.parseInt(metadata.ss_stop_count_total.toString()) : 0;\n\nvar dtHrs = (tsMs - lastTs) / 3600000.0;\nif (dtHrs < 0.0 || dtHrs > 24.0) {\n    dtHrs = 0.0;\n}\n\nif (isRun) {\n    lifeHrs = Math.round((lifeHrs + dtHrs) * 100.0) / 100.0;\n    cycleHrs = Math.round((cycleHrs + dtHrs) * 100.0) / 100.0;\n    contHrs = Math.round((contHrs + dtHrs) * 100.0) / 100.0;\n} else {\n    contHrs = 0.0;\n}\n\nvar outMsg = {\n    \"last_run_ts\": tsMs,\n    \"last_status\": curStInt,\n    \"runtime_lifetime_hours\": lifeHrs,\n    \"runtime_hours_total\": cycleHrs,\n    \"continuous_run_hours\": contHrs,\n    \"maintenance_due\": (cycleHrs >= maintLimit)\n};\n\nif (curStInt != prevStInt && tsMs > lastChangeTs) {\n    var durSec = Math.max(1L, Math.round((tsMs - lastChangeTs) / 1000.0));\n    var durStr = \"\";\n    if (durSec < 60L) {\n        durStr = durSec + \" giây\";\n    } else if (durSec < 3600L) {\n        var m = toInt(durSec / 60L);\n        var s = durSec % 60L;\n        durStr = m + \"p\" + (s > 0L ? \" \" + s + \"s\" : \"\");\n    } else {\n        var h = toInt(durSec / 3600L);\n        var rm = toInt((durSec % 3600L) / 60L);\n        durStr = h + \"h \" + rm + \"p\";\n    }\n\n    if (isRun) {\n        startCnt = startCnt + 1;\n        outMsg.start_count_total = startCnt;\n        outMsg.switch_event_type = \"START\";\n        outMsg.switch_cycle_sec = durSec;\n        outMsg.switch_event_text = \"Đóng contactor khởi động (Sau \" + durStr + \" nghỉ)\";\n    } else {\n        stopCnt = stopCnt + 1;\n        outMsg.stop_count_total = stopCnt;\n        outMsg.switch_event_type = \"STOP\";\n        outMsg.switch_cycle_sec = durSec;\n        outMsg.switch_event_text = \"Ngắt contactor dừng máy (Chu kỳ chạy \" + durStr + \")\";\n    }\n    outMsg.last_state_change_ts = tsMs;\n} else if (metadata.ss_last_state_change_ts == null) {\n    outMsg.last_state_change_ts = tsMs;\n}\n\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};",
-        "tbelScript" : "var statusStr = msg.status != null ? msg.status.toString().trim().toUpperCase() : \"\";\nvar isRun = (statusStr == \"RUNNING\" || statusStr == \"ON\" || statusStr == \"1\" || statusStr == \"1.0\" || statusStr == \"TRUE\" || msg.run == 1 || msg.run == true);\nvar curStInt = isRun ? 1 : 0;\n\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar lastTs = metadata.ss_last_run_ts != null ? Long.parseLong(metadata.ss_last_run_ts.toString()) : tsMs;\nvar lastChangeTs = metadata.ss_last_state_change_ts != null ? Long.parseLong(metadata.ss_last_state_change_ts.toString()) : lastTs;\nvar prevStInt = metadata.ss_last_status != null ? Integer.parseInt(metadata.ss_last_status.toString()) : curStInt;\n\nvar lifeHrs = metadata.ss_runtime_lifetime_hours != null ? Double.parseDouble(metadata.ss_runtime_lifetime_hours.toString()) : 0.0;\nvar cycleHrs = metadata.ss_runtime_hours_total != null ? Double.parseDouble(metadata.ss_runtime_hours_total.toString()) : 0.0;\nvar contHrs = metadata.ss_continuous_run_hours != null ? Double.parseDouble(metadata.ss_continuous_run_hours.toString()) : 0.0;\nvar maintLimit = metadata.ss_maintenance_limit_hours != null ? Double.parseDouble(metadata.ss_maintenance_limit_hours.toString()) : 1000.0;\nvar startCnt = metadata.ss_start_count_total != null ? Integer.parseInt(metadata.ss_start_count_total.toString()) : 0;\nvar stopCnt = metadata.ss_stop_count_total != null ? Integer.parseInt(metadata.ss_stop_count_total.toString()) : 0;\n\nvar dtHrs = (tsMs - lastTs) / 3600000.0;\nif (dtHrs < 0.0 || dtHrs > 24.0) {\n    dtHrs = 0.0;\n}\n\nif (isRun) {\n    lifeHrs = Math.round((lifeHrs + dtHrs) * 100.0) / 100.0;\n    cycleHrs = Math.round((cycleHrs + dtHrs) * 100.0) / 100.0;\n    contHrs = Math.round((contHrs + dtHrs) * 100.0) / 100.0;\n} else {\n    contHrs = 0.0;\n}\n\nvar outMsg = {\n    \"last_run_ts\": tsMs,\n    \"last_status\": curStInt,\n    \"runtime_lifetime_hours\": lifeHrs,\n    \"runtime_hours_total\": cycleHrs,\n    \"continuous_run_hours\": contHrs,\n    \"maintenance_due\": (cycleHrs >= maintLimit)\n};\n\nif (curStInt != prevStInt && tsMs > lastChangeTs) {\n    var durSec = Math.max(1L, Math.round((tsMs - lastChangeTs) / 1000.0));\n    var durStr = \"\";\n    if (durSec < 60L) {\n        durStr = durSec + \" giây\";\n    } else if (durSec < 3600L) {\n        var m = toInt(durSec / 60L);\n        var s = durSec % 60L;\n        durStr = m + \"p\" + (s > 0L ? \" \" + s + \"s\" : \"\");\n    } else {\n        var h = toInt(durSec / 3600L);\n        var rm = toInt((durSec % 3600L) / 60L);\n        durStr = h + \"h \" + rm + \"p\";\n    }\n\n    if (isRun) {\n        startCnt = startCnt + 1;\n        outMsg.start_count_total = startCnt;\n        outMsg.switch_event_type = \"START\";\n        outMsg.switch_cycle_sec = durSec;\n        outMsg.switch_event_text = \"Đóng contactor khởi động (Sau \" + durStr + \" nghỉ)\";\n    } else {\n        stopCnt = stopCnt + 1;\n        outMsg.stop_count_total = stopCnt;\n        outMsg.switch_event_type = \"STOP\";\n        outMsg.switch_cycle_sec = durSec;\n        outMsg.switch_event_text = \"Ngắt contactor dừng máy (Chu kỳ chạy \" + durStr + \")\";\n    }\n    outMsg.last_state_change_ts = tsMs;\n} else if (metadata.ss_last_state_change_ts == null) {\n    outMsg.last_state_change_ts = tsMs;\n}\n\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};"
+        "jsScript" : "// Accumulate runtime hours (life, cycle, cont) for all 16 DI channels on ONSEN_PLC_MAIN\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar lastTs = metadata.ss_last_plc_di_ts != null ? Long.parseLong(metadata.ss_last_plc_di_ts.toString()) : tsMs;\nvar dtHrs = (tsMs - lastTs) / 3600000.0;\nif (dtHrs < 0.0 || dtHrs > 24.0) {\n    dtHrs = 0.0;\n}\n\nvar rtMap = {};\nif (metadata.ss_di_runtime_map_json != null && !metadata.ss_di_runtime_map_json.toString().isEmpty()) {\n    rtMap = JSON.parse(metadata.ss_di_runtime_map_json.toString());\n}\n\nvar diKeys = [\n    \"DI_01_X0\", \"DI_02_X1\", \"DI_03_X2\", \"DI_04_X3\",\n    \"DI_05_X4\", \"DI_06_X5\", \"DI_07_X6\", \"DI_08_X7\",\n    \"DI_09_X10\", \"DI_10_X11\", \"DI_11_X12\", \"DI_12_X13\",\n    \"DI_13_X14\", \"DI_14_X15\", \"DI_15_X16\", \"DI_16_X17\"\n];\n\nvar hasAnyDi = false;\nvar maskVal = msg.DI_BITMASK_16 != null ? Integer.parseInt(msg.DI_BITMASK_16.toString()) : -1;\n\nfor (var i = 0; i < diKeys.size(); i++) {\n    var k = diKeys[i];\n    var vObj = msg[k];\n    var isOn = false;\n    var hasCh = false;\n    if (vObj != null) {\n        hasCh = true;\n        var s = vObj.toString().trim().toUpperCase();\n        isOn = (s.equals(\"1\") || s.equals(\"1.0\") || s.equals(\"TRUE\") || s.equals(\"ON\") || s.equals(\"RUNNING\"));\n    } else if (maskVal >= 0) {\n        hasCh = true;\n        isOn = ((maskVal & (1 << i)) != 0);\n    }\n\n    if (hasCh) {\n        hasAnyDi = true;\n        var entry = rtMap[k];\n        if (entry == null) {\n            entry = {\n                \"ch\": i,\n                \"diKey\": k,\n                \"life\": 0.0,\n                \"cycle\": 0.0,\n                \"cont\": 0.0,\n                \"limit\": 1000.0,\n                \"lastDate\": \"01/10/2026 08:00\",\n                \"resetCount\": 1\n            };\n        }\n        var life = entry.life != null ? Double.parseDouble(entry.life.toString()) : 0.0;\n        var cycle = entry.cycle != null ? Double.parseDouble(entry.cycle.toString()) : 0.0;\n        var cont = entry.cont != null ? Double.parseDouble(entry.cont.toString()) : 0.0;\n\n        if (isOn) {\n            life = Math.round((life + dtHrs) * 100.0) / 100.0;\n            cycle = Math.round((cycle + dtHrs) * 100.0) / 100.0;\n            cont = Math.round((cont + dtHrs) * 100.0) / 100.0;\n        } else {\n            cont = 0.0;\n        }\n        entry.life = life;\n        entry.cycle = cycle;\n        entry.cont = cont;\n        entry.running = isOn ? 1 : 0;\n        rtMap[k] = entry;\n    }\n}\n\nif (!hasAnyDi) {\n    return null;\n}\n\nvar outMsg = {\n    \"last_plc_di_ts\": tsMs,\n    \"di_runtime_map_json\": JSON.stringify(rtMap)\n};\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};\n",
+        "tbelScript" : "// Accumulate runtime hours (life, cycle, cont) for all 16 DI channels on ONSEN_PLC_MAIN\nvar tsMs = metadata.ts != null ? Long.parseLong(metadata.ts.toString()) : System.currentTimeMillis();\nvar lastTs = metadata.ss_last_plc_di_ts != null ? Long.parseLong(metadata.ss_last_plc_di_ts.toString()) : tsMs;\nvar dtHrs = (tsMs - lastTs) / 3600000.0;\nif (dtHrs < 0.0 || dtHrs > 24.0) {\n    dtHrs = 0.0;\n}\n\nvar rtMap = {};\nif (metadata.ss_di_runtime_map_json != null && !metadata.ss_di_runtime_map_json.toString().isEmpty()) {\n    rtMap = JSON.parse(metadata.ss_di_runtime_map_json.toString());\n}\n\nvar diKeys = [\n    \"DI_01_X0\", \"DI_02_X1\", \"DI_03_X2\", \"DI_04_X3\",\n    \"DI_05_X4\", \"DI_06_X5\", \"DI_07_X6\", \"DI_08_X7\",\n    \"DI_09_X10\", \"DI_10_X11\", \"DI_11_X12\", \"DI_12_X13\",\n    \"DI_13_X14\", \"DI_14_X15\", \"DI_15_X16\", \"DI_16_X17\"\n];\n\nvar hasAnyDi = false;\nvar maskVal = msg.DI_BITMASK_16 != null ? Integer.parseInt(msg.DI_BITMASK_16.toString()) : -1;\n\nfor (var i = 0; i < diKeys.size(); i++) {\n    var k = diKeys[i];\n    var vObj = msg[k];\n    var isOn = false;\n    var hasCh = false;\n    if (vObj != null) {\n        hasCh = true;\n        var s = vObj.toString().trim().toUpperCase();\n        isOn = (s.equals(\"1\") || s.equals(\"1.0\") || s.equals(\"TRUE\") || s.equals(\"ON\") || s.equals(\"RUNNING\"));\n    } else if (maskVal >= 0) {\n        hasCh = true;\n        isOn = ((maskVal & (1 << i)) != 0);\n    }\n\n    if (hasCh) {\n        hasAnyDi = true;\n        var entry = rtMap[k];\n        if (entry == null) {\n            entry = {\n                \"ch\": i,\n                \"diKey\": k,\n                \"life\": 0.0,\n                \"cycle\": 0.0,\n                \"cont\": 0.0,\n                \"limit\": 1000.0,\n                \"lastDate\": \"01/10/2026 08:00\",\n                \"resetCount\": 1\n            };\n        }\n        var life = entry.life != null ? Double.parseDouble(entry.life.toString()) : 0.0;\n        var cycle = entry.cycle != null ? Double.parseDouble(entry.cycle.toString()) : 0.0;\n        var cont = entry.cont != null ? Double.parseDouble(entry.cont.toString()) : 0.0;\n\n        if (isOn) {\n            life = Math.round((life + dtHrs) * 100.0) / 100.0;\n            cycle = Math.round((cycle + dtHrs) * 100.0) / 100.0;\n            cont = Math.round((cont + dtHrs) * 100.0) / 100.0;\n        } else {\n            cont = 0.0;\n        }\n        entry.life = life;\n        entry.cycle = cycle;\n        entry.cont = cont;\n        entry.running = isOn ? 1 : 0;\n        rtMap[k] = entry;\n    }\n}\n\nif (!hasAnyDi) {\n    return null;\n}\n\nvar outMsg = {\n    \"last_plc_di_ts\": tsMs,\n    \"di_runtime_map_json\": JSON.stringify(rtMap)\n};\nreturn {msg: outMsg, metadata: metadata, msgType: \"POST_TELEMETRY_REQUEST\"};\n"
       },
       "configurationVersion" : 0,
       "createdTime" : 0,
@@ -754,6 +806,103 @@
       "ruleChainId" : null,
       "singletonMode" : false,
       "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
+    }, {
+      "additionalInfo" : {
+        "description" : "Loại bỏ các biến đếm chu kỳ quét 2s khỏi lịch sử ts_kv",
+        "layoutX" : 820,
+        "layoutY" : 80
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "jsScript" : "// Strip 2-second volatile diagnostic counters from ONSEN_PLC_MAIN before writing to ts_kv history\nmsg.remove(\"SYS_HEARTBEAT\");\nmsg.remove(\"SYS_SCAN_MS\");\nmsg.remove(\"SYS_UPTIME_SEC_32\");\nmsg.remove(\"SLOW_POLL_TIMER_SEC\");\nmsg.remove(\"COM0_ROW_IDX\");\nmsg.remove(\"COM1_ROW_IDX\");\nmsg.remove(\"COM0_CUR_SLAVE\");\nmsg.remove(\"COM1_CUR_SLAVE\");\nmsg.remove(\"last_good_ts\");\nif (msg.isEmpty()) {\n    return null;\n}\nreturn {msg: msg, metadata: metadata, msgType: msgType};\n",
+        "tbelScript" : "// Strip 2-second volatile diagnostic counters from ONSEN_PLC_MAIN before writing to ts_kv history\nmsg.remove(\"SYS_HEARTBEAT\");\nmsg.remove(\"SYS_SCAN_MS\");\nmsg.remove(\"SYS_UPTIME_SEC_32\");\nmsg.remove(\"SLOW_POLL_TIMER_SEC\");\nmsg.remove(\"COM0_ROW_IDX\");\nmsg.remove(\"COM1_ROW_IDX\");\nmsg.remove(\"COM0_CUR_SLAVE\");\nmsg.remove(\"COM1_CUR_SLAVE\");\nmsg.remove(\"last_good_ts\");\nif (msg.isEmpty()) {\n    return null;\n}\nreturn {msg: msg, metadata: metadata, msgType: msgType};\n"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "aefbe780-d678-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_07A Lọc Biến Nhịp Tim PLC Trước Khi Ghi Lịch Sử ts_kv",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
+    }, {
+      "additionalInfo" : {
+        "description" : "Bóc tách 12 kênh PT100 & 16 kênh DI từ ONSEN_PLC_MAIN sang 9 Zone Assets",
+        "layoutX" : 820,
+        "layoutY" : 260
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "jsScript" : "// Demultiplex ONSEN_PLC_MAIN (12 PT100 + 16 DI) to the 9 Zone Assets (AST_*)\nvar isOff = (msg.quality != null && msg.quality.toString().toUpperCase().equals(\"BAD\"));\nvar errStr = msg.errorReason != null ? msg.errorReason.toString() : \"\";\nvar fMask = msg.PT100_FAULT_MASK != null ? Integer.parseInt(msg.PT100_FAULT_MASK.toString()) : 0;\nvar diMask = msg.DI_BITMASK_16 != null ? Integer.parseInt(msg.DI_BITMASK_16.toString()) : -1;\n\nvar zones = [\n    {\"ast\": \"AST_COLD_POOL_28\", \"z\": \"Z01\", \"pt\": \"PT100_CH03_BoiLanh28\",   \"ptAlt\": \"PT100_CH01_BeLanh_28C\",  \"chBit\": 2, \"di\": [\"DI_01_X0\"], \"diBits\": [0], \"lbl\": \"Bơm tuần hoàn bể lạnh 28°C\"},\n    {\"ast\": \"AST_COLD_POOL_1\",  \"z\": \"Z02\", \"pt\": \"PT100_CH04_BoiLanh18_1\", \"ptAlt\": \"PT100_CH02_BeLanh_1_15C\",\"chBit\": 3, \"di\": [\"DI_02_X1\"], \"diBits\": [1], \"lbl\": \"Bơm tuần hoàn bể lạnh 1\"},\n    {\"ast\": \"AST_COLD_POOL_2\",  \"z\": \"Z03\", \"pt\": \"PT100_CH05_BoiLanh18_2\", \"ptAlt\": \"PT100_CH03_BeLanh_2_10C\",\"chBit\": 4, \"di\": [\"DI_03_X2\"], \"diBits\": [2], \"lbl\": \"Bơm tuần hoàn bể lạnh 2\"},\n    {\"ast\": \"AST_JACUZZI_35\",   \"z\": \"Z04\", \"pt\": \"PT100_CH02_Jacuzzi35\",   \"ptAlt\": \"PT100_CH04_Jacuzzi_38C\", \"chBit\": 1, \"di\": [\"DI_04_X3\"], \"diBits\": [3], \"lbl\": \"Bơm sục Jacuzzi 35°C\"},\n    {\"ast\": \"AST_HOT_POOL_40\",  \"z\": \"Z05\", \"pt\": \"PT100_CH01_BoiNong40\",   \"ptAlt\": \"PT100_CH05_BeNong_42C\",  \"chBit\": 0, \"di\": [\"DI_05_X4\", \"DI_15_X16\"], \"diBits\": [4, 14], \"lbl\": \"Bơm tuần hoàn bể nóng 40°C\"},\n    {\"ast\": \"AST_SAUNA_DRY\",    \"z\": \"Z06\", \"pt\": \"PT100_CH06_SaunaKho_1\",  \"ptAlt\": \"PT100_CH07_SaunaKho_2\",  \"chBit\": 5, \"di\": [\"DI_06_X5\", \"DI_07_X6\", \"DI_08_X7\"], \"diBits\": [5, 6, 7], \"lbl\": \"3 Cụm thanh nhiệt Xông Khô\"},\n    {\"ast\": \"AST_STEAM_BIG\",    \"z\": \"Z07\", \"pt\": \"PT100_CH08_SaunaUot_1\",  \"ptAlt\": \"PT100_CH08_SaunaUot_Lon\",\"chBit\": 7, \"di\": [\"DI_09_X10\", \"DI_10_X11\"], \"diBits\": [8, 9], \"lbl\": \"2 Máy phát hơi Xông Ướt Lớn\"},\n    {\"ast\": \"AST_STEAM_SMALL\",  \"z\": \"Z08\", \"pt\": \"PT100_CH09_SaunaUot_2\",  \"ptAlt\": \"PT100_CH09_SaunaUot_Nho\",\"chBit\": 8, \"di\": [\"DI_11_X12\"], \"diBits\": [10], \"lbl\": \"Máy phát hơi thảo dược Xông Ướt Bé\"},\n    {\"ast\": \"AST_SNOW_ROOM\",    \"z\": \"Z09\", \"pt\": \"PT100_CH10_PhongTuyet\",  \"ptAlt\": \"PT100_CH10_PhongTuyet\",  \"chBit\": 9, \"di\": [\"DI_12_X13\", \"DI_13_X14\", \"DI_14_X15\"], \"diBits\": [11, 12, 13], \"lbl\": \"Cụm Chiller & Máy làm tuyết\"}\n];\n\nvar outList = [];\nfor (var i = 0; i < zones.size(); i++) {\n    var z = zones[i];\n    var zMsg = {};\n    var touched = false;\n\n    var rawT = msg[z.pt] != null ? msg[z.pt] : msg[z.ptAlt];\n    var wireFault = ((fMask & (1 << z.chBit)) != 0);\n\n    if (isOff) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"OFFLINE\";\n        zMsg.online = 0;\n        zMsg.errorReason = errStr.isEmpty() ? \"PLC_MODBUS_OFFLINE\" : errStr;\n        touched = true;\n    } else if (wireFault) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"SENSOR_FAULT\";\n        zMsg.online = 0;\n        zMsg.errorReason = \"PT100_WIRE_BREAK:\" + z.pt;\n        touched = true;\n    } else if (rawT != null) {\n        var tVal = Double.parseDouble(rawT.toString());\n        if (z.z.equals(\"Z06\") && msg.PT100_CH07_SaunaKho_2 != null) {\n            var t2 = Double.parseDouble(msg.PT100_CH07_SaunaKho_2.toString());\n            zMsg.temperature_ch1 = tVal;\n            zMsg.temperature_ch2 = t2;\n            tVal = Math.round(((tVal + t2) / 2.0) * 10.0) / 10.0;\n        }\n        if (z.z.equals(\"Z05\")) {\n            if (msg.PT100_CH11_CapNhiet_1 != null) { zMsg.temp_supply_1 = Double.parseDouble(msg.PT100_CH11_CapNhiet_1.toString()); }\n            if (msg.PT100_CH12_CapNhiet_2 != null) { zMsg.temp_supply_2 = Double.parseDouble(msg.PT100_CH12_CapNhiet_2.toString()); }\n        }\n        zMsg.temperature = tVal;\n        zMsg.quality = \"GOOD\";\n        zMsg.comm_status = \"ONLINE\";\n        zMsg.online = 1;\n        zMsg.errorReason = \"\";\n        touched = true;\n    }\n\n    // Check DI channels for this zone\n    var dList = z.di;\n    var bList = z.diBits;\n    var runCnt = 0;\n    var hasDiUpdate = false;\n    for (var j = 0; j < dList.size(); j++) {\n        var dk = dList[j];\n        var db = bList[j];\n        if (msg[dk] != null) {\n            hasDiUpdate = true;\n            var sv = msg[dk].toString().trim().toUpperCase();\n            if (sv.equals(\"1\") || sv.equals(\"1.0\") || sv.equals(\"TRUE\") || sv.equals(\"ON\")) {\n                runCnt = runCnt + 1;\n            }\n        } else if (diMask >= 0) {\n            hasDiUpdate = true;\n            if ((diMask & (1 << db)) != 0) {\n                runCnt = runCnt + 1;\n            }\n        }\n    }\n\n    if (hasDiUpdate && !isOff) {\n        zMsg.di_running_count = runCnt;\n        zMsg.di_total_count = dList.size();\n        zMsg.di_primary_status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        zMsg.status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        touched = true;\n    }\n\n    if (touched) {\n        var zMeta = metadata.copy();\n        zMeta.targetAssetName = z.ast;\n        zMeta.deviceName = z.ast;\n        zMeta.deviceType = \"Onsen_Zone\";\n        outList.add({msg: zMsg, metadata: zMeta, msgType: \"POST_TELEMETRY_REQUEST\"});\n    }\n}\n\nreturn outList;\n",
+        "tbelScript" : "// Demultiplex ONSEN_PLC_MAIN (12 PT100 + 16 DI) to the 9 Zone Assets (AST_*)\nvar isOff = (msg.quality != null && msg.quality.toString().toUpperCase().equals(\"BAD\"));\nvar errStr = msg.errorReason != null ? msg.errorReason.toString() : \"\";\nvar fMask = msg.PT100_FAULT_MASK != null ? Integer.parseInt(msg.PT100_FAULT_MASK.toString()) : 0;\nvar diMask = msg.DI_BITMASK_16 != null ? Integer.parseInt(msg.DI_BITMASK_16.toString()) : -1;\n\nvar zones = [\n    {\"ast\": \"AST_COLD_POOL_28\", \"z\": \"Z01\", \"pt\": \"PT100_CH03_BoiLanh28\",   \"ptAlt\": \"PT100_CH01_BeLanh_28C\",  \"chBit\": 2, \"di\": [\"DI_01_X0\"], \"diBits\": [0], \"lbl\": \"Bơm tuần hoàn bể lạnh 28°C\"},\n    {\"ast\": \"AST_COLD_POOL_1\",  \"z\": \"Z02\", \"pt\": \"PT100_CH04_BoiLanh18_1\", \"ptAlt\": \"PT100_CH02_BeLanh_1_15C\",\"chBit\": 3, \"di\": [\"DI_02_X1\"], \"diBits\": [1], \"lbl\": \"Bơm tuần hoàn bể lạnh 1\"},\n    {\"ast\": \"AST_COLD_POOL_2\",  \"z\": \"Z03\", \"pt\": \"PT100_CH05_BoiLanh18_2\", \"ptAlt\": \"PT100_CH03_BeLanh_2_10C\",\"chBit\": 4, \"di\": [\"DI_03_X2\"], \"diBits\": [2], \"lbl\": \"Bơm tuần hoàn bể lạnh 2\"},\n    {\"ast\": \"AST_JACUZZI_35\",   \"z\": \"Z04\", \"pt\": \"PT100_CH02_Jacuzzi35\",   \"ptAlt\": \"PT100_CH04_Jacuzzi_38C\", \"chBit\": 1, \"di\": [\"DI_04_X3\"], \"diBits\": [3], \"lbl\": \"Bơm sục Jacuzzi 35°C\"},\n    {\"ast\": \"AST_HOT_POOL_40\",  \"z\": \"Z05\", \"pt\": \"PT100_CH01_BoiNong40\",   \"ptAlt\": \"PT100_CH05_BeNong_42C\",  \"chBit\": 0, \"di\": [\"DI_05_X4\", \"DI_15_X16\"], \"diBits\": [4, 14], \"lbl\": \"Bơm tuần hoàn bể nóng 40°C\"},\n    {\"ast\": \"AST_SAUNA_DRY\",    \"z\": \"Z06\", \"pt\": \"PT100_CH06_SaunaKho_1\",  \"ptAlt\": \"PT100_CH07_SaunaKho_2\",  \"chBit\": 5, \"di\": [\"DI_06_X5\", \"DI_07_X6\", \"DI_08_X7\"], \"diBits\": [5, 6, 7], \"lbl\": \"3 Cụm thanh nhiệt Xông Khô\"},\n    {\"ast\": \"AST_STEAM_BIG\",    \"z\": \"Z07\", \"pt\": \"PT100_CH08_SaunaUot_1\",  \"ptAlt\": \"PT100_CH08_SaunaUot_Lon\",\"chBit\": 7, \"di\": [\"DI_09_X10\", \"DI_10_X11\"], \"diBits\": [8, 9], \"lbl\": \"2 Máy phát hơi Xông Ướt Lớn\"},\n    {\"ast\": \"AST_STEAM_SMALL\",  \"z\": \"Z08\", \"pt\": \"PT100_CH09_SaunaUot_2\",  \"ptAlt\": \"PT100_CH09_SaunaUot_Nho\",\"chBit\": 8, \"di\": [\"DI_11_X12\"], \"diBits\": [10], \"lbl\": \"Máy phát hơi thảo dược Xông Ướt Bé\"},\n    {\"ast\": \"AST_SNOW_ROOM\",    \"z\": \"Z09\", \"pt\": \"PT100_CH10_PhongTuyet\",  \"ptAlt\": \"PT100_CH10_PhongTuyet\",  \"chBit\": 9, \"di\": [\"DI_12_X13\", \"DI_13_X14\", \"DI_14_X15\"], \"diBits\": [11, 12, 13], \"lbl\": \"Cụm Chiller & Máy làm tuyết\"}\n];\n\nvar outList = [];\nfor (var i = 0; i < zones.size(); i++) {\n    var z = zones[i];\n    var zMsg = {};\n    var touched = false;\n\n    var rawT = msg[z.pt] != null ? msg[z.pt] : msg[z.ptAlt];\n    var wireFault = ((fMask & (1 << z.chBit)) != 0);\n\n    if (isOff) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"OFFLINE\";\n        zMsg.online = 0;\n        zMsg.errorReason = errStr.isEmpty() ? \"PLC_MODBUS_OFFLINE\" : errStr;\n        touched = true;\n    } else if (wireFault) {\n        zMsg.quality = \"BAD\";\n        zMsg.comm_status = \"SENSOR_FAULT\";\n        zMsg.online = 0;\n        zMsg.errorReason = \"PT100_WIRE_BREAK:\" + z.pt;\n        touched = true;\n    } else if (rawT != null) {\n        var tVal = Double.parseDouble(rawT.toString());\n        if (z.z.equals(\"Z06\") && msg.PT100_CH07_SaunaKho_2 != null) {\n            var t2 = Double.parseDouble(msg.PT100_CH07_SaunaKho_2.toString());\n            zMsg.temperature_ch1 = tVal;\n            zMsg.temperature_ch2 = t2;\n            tVal = Math.round(((tVal + t2) / 2.0) * 10.0) / 10.0;\n        }\n        if (z.z.equals(\"Z05\")) {\n            if (msg.PT100_CH11_CapNhiet_1 != null) { zMsg.temp_supply_1 = Double.parseDouble(msg.PT100_CH11_CapNhiet_1.toString()); }\n            if (msg.PT100_CH12_CapNhiet_2 != null) { zMsg.temp_supply_2 = Double.parseDouble(msg.PT100_CH12_CapNhiet_2.toString()); }\n        }\n        zMsg.temperature = tVal;\n        zMsg.quality = \"GOOD\";\n        zMsg.comm_status = \"ONLINE\";\n        zMsg.online = 1;\n        zMsg.errorReason = \"\";\n        touched = true;\n    }\n\n    // Check DI channels for this zone\n    var dList = z.di;\n    var bList = z.diBits;\n    var runCnt = 0;\n    var hasDiUpdate = false;\n    for (var j = 0; j < dList.size(); j++) {\n        var dk = dList[j];\n        var db = bList[j];\n        if (msg[dk] != null) {\n            hasDiUpdate = true;\n            var sv = msg[dk].toString().trim().toUpperCase();\n            if (sv.equals(\"1\") || sv.equals(\"1.0\") || sv.equals(\"TRUE\") || sv.equals(\"ON\")) {\n                runCnt = runCnt + 1;\n            }\n        } else if (diMask >= 0) {\n            hasDiUpdate = true;\n            if ((diMask & (1 << db)) != 0) {\n                runCnt = runCnt + 1;\n            }\n        }\n    }\n\n    if (hasDiUpdate && !isOff) {\n        zMsg.di_running_count = runCnt;\n        zMsg.di_total_count = dList.size();\n        zMsg.di_primary_status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        zMsg.status = runCnt > 0 ? \"RUNNING\" : \"STANDBY\";\n        touched = true;\n    }\n\n    if (touched) {\n        var zMeta = metadata.copy();\n        zMeta.targetAssetName = z.ast;\n        zMeta.deviceName = z.ast;\n        zMeta.deviceType = \"Onsen_Zone\";\n        outList.add({msg: zMsg, metadata: zMeta, msgType: \"POST_TELEMETRY_REQUEST\"});\n    }\n}\n\nreturn outList;\n"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "aefc0e90-d678-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_07B Tách Tín Hiệu PT100 & DI Từ PLC Sang 9 Khu Vực (AST_*)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.transform.TbTransformMsgNode"
+    }, {
+      "additionalInfo" : {
+        "description" : "Chuyển thực thể nhận dữ liệu sang AST_COLD_POOL_28 .. AST_SNOW_ROOM",
+        "layoutX" : 1120,
+        "layoutY" : 260
+      },
+      "configuration" : {
+        "originatorSource" : "ENTITY",
+        "entityType" : "ASSET",
+        "entityNamePattern" : "${targetAssetName}",
+        "relationsQuery" : null
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "afd92820-d678-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_07C Đổi Originator Sang Zone Asset (${targetAssetName})",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.transform.TbChangeOriginatorNode"
+    }, {
+      "additionalInfo" : {
+        "description" : "Định tuyến nhiệt độ và trạng thái của từng Zone Asset",
+        "layoutX" : 1400,
+        "layoutY" : 260
+      },
+      "configuration" : {
+        "scriptLang" : "TBEL",
+        "jsScript" : "// Route demultiplexed Zone Asset message\nvar qStr = msg.quality != null ? msg.quality.toString().toUpperCase() : \"\";\nif (qStr.equals(\"BAD\")) {\n    if (msg.comm_status != null && msg.comm_status.toString().equals(\"SENSOR_FAULT\")) {\n        return [\"Zone_Status_Route\", \"Sensor_Spike_Fault\"];\n    }\n    return [\"Comm_Fault_Route\"];\n}\n\nvar routes = [\"Zone_Status_Route\", \"Comm_Restored_Route\"];\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Zone_Status_Route\", \"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Zone_Temp_TS_Route\");\n    routes.add(\"Temp_Route\");\n}\nreturn routes;\n",
+        "tbelScript" : "// Route demultiplexed Zone Asset message\nvar qStr = msg.quality != null ? msg.quality.toString().toUpperCase() : \"\";\nif (qStr.equals(\"BAD\")) {\n    if (msg.comm_status != null && msg.comm_status.toString().equals(\"SENSOR_FAULT\")) {\n        return [\"Zone_Status_Route\", \"Sensor_Spike_Fault\"];\n    }\n    return [\"Comm_Fault_Route\"];\n}\n\nvar routes = [\"Zone_Status_Route\", \"Comm_Restored_Route\"];\nif (msg.temperature != null) {\n    var t = Double.parseDouble(msg.temperature.toString());\n    if (t < -45.0 || t > 160.0) {\n        msg.quality = \"BAD\";\n        msg.comm_status = \"SENSOR_FAULT\";\n        msg.errorReason = \"PT100_WIRE_FAULT:\" + t + \"C\";\n        return [\"Zone_Status_Route\", \"Sensor_Spike_Fault\"];\n    }\n    routes.add(\"Zone_Temp_TS_Route\");\n    routes.add(\"Temp_Route\");\n}\nreturn routes;\n"
+      },
+      "configurationVersion" : 0,
+      "createdTime" : 0,
+      "debugSettings" : null,
+      "externalId" : null,
+      "id" : {
+        "entityType" : "RULE_NODE",
+        "id" : "afd94f30-d678-11f1-a6d9-970576ca9a33"
+      },
+      "name" : "AI_07D Phân Luồng Nhiệt Độ & Cảnh Báo Khu Vực (Zone Router)",
+      "queueName" : null,
+      "ruleChainId" : null,
+      "singletonMode" : false,
+      "type" : "org.thingsboard.rule.engine.filter.TbJsSwitchNode"
     } ],
     "ruleChainConnections" : null
   },
@@ -782,7 +931,7 @@
     },
     "type" : "Uses",
     "typeGroup" : "COMMON",
-    "version" : 3251
+    "version" : 3868
   } ],
   "attributes" : {
     "SERVER_SCOPE" : [ ]
